@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VaultAssist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef6ff;
+}
+
+.hidden { display: none; }
+
+.login {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box {
+  background: white;
+  padding: 30px;
+  width: 320px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sidebar {
+  position: fixed;
+  width: 220px;
+  height: 100vh;
+  background: #0077cc;
+  color: white;
+  padding: 20px;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.good { color: green; }
+.warn { color: orange; }
+.bad { color: red; }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login">
+  <div class="box">
+    <div style="font-size:40px;">🐬</div>
+    <h2>VaultAssist</h2>
+    <input id="nameInput" placeholder="Your name">
+    <select id="roleInput">
+      <option>Employee</option>
+      <option>Manager</option>
+    </select>
+    <button onclick="enter()">Enter Dashboard</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+  <div class="sidebar">
+    <h2>VaultAssist</h2>
+    <p>📊 Analytics</p>
+    <p>💰 Loans</p>
+    <p>🧠 Wellness</p>
+    <p>🤖 Wave AI</p>
+    <p onclick="logout()" style="cursor:pointer;">🚪 Logout</p>
+  </div>
+
+  <div class="main">
+    <h1 id="welcomeText"></h1>
+
+    <div class="card">
+      <h3>Add Loan</h3>
+      <input id="customerInput" placeholder="Customer name">
+      <input id="amountInput" type="number" placeholder="Loan amount">
+      <button onclick="addLoan()">Add Loan</button>
+    </div>
+
+    <div class="card">
+      <h3>Loan List</h3>
+      <div id="loanList"></div>
+    </div>
+
+    <div class="card">
+      <h3>Workplace Insight</h3>
+      <button onclick="setStress(1)">Good</button>
+      <button onclick="setStress(2)">Neutral</button>
+      <button onclick="setStress(3)">Stressed</button>
+      <p id="stressText"></p>
+    </div>
+
+    <div class="card">
+      <h3>🐬 Wave AI Insight</h3>
+      <p id="aiText"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== DATA ===== */
+let loans = JSON.parse(localStorage.getItem("va_loans")) || [];
+let stress = Number(localStorage.getItem("va_stress")) || 1;
+let user = JSON.parse(localStorage.getItem("va_user"));
+
+/* ===== LOGIN ===== */
+function enter() {
+  const name = document.getElementById("nameInput").value;
+  const role = document.getElementById("roleInput").value;
+
+  user = { name, role };
+  localStorage.setItem("va_user", JSON.stringify(user));
+
+  showDashboard();
+}
+
+/* ===== LOGOUT ===== */
+function logout() {
+  localStorage.clear();
+  location.reload();
+}
+
+/* ===== DASHBOARD INIT ===== */
+function showDashboard() {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("welcomeText").innerText =
+    `Welcome ${user.name} (${user.role})`;
+
+  renderLoans();
+  renderStress();
+  updateAI();
+}
+
+/* ===== LOANS ===== */
+function addLoan() {
+  const customer = document.getElementById("customerInput").value;
+  const amount = document.getElementById("amountInput").value;
+
+  if (!customer || !amount) {
+    alert("Fill all fields");
+    return;
+  }
+
+  loans.push({ customer, amount });
+  localStorage.setItem("va_loans", JSON.stringify(loans));
+
+  document.getElementById("customerInput").value = "";
+  document.getElementById("amountInput").value = "";
+
+  renderLoans();
+  updateAI();
+}
+
+function renderLoans() {
+  const list = document.getElementById("loanList");
+  list.innerHTML = "";
+
+  loans.forEach(l =>
+    list.innerHTML += `<p>${l.customer} – $${l.amount}</p>`
+  );
+}
+
+/* ===== STRESS ===== */
+function setStress(level) {
+  stress = level;
+  localStorage.setItem("va_stress", level);
+  renderStress();
+  updateAI();
+}
+
+function renderStress() {
+  const t = document.getElementById("stressText");
+
+  if (stress === 1) t.innerHTML = "<span class='good'>Healthy</span>";
+  if (stress === 2) t.innerHTML = "<span class='warn'>Moderate</span>";
+  if (stress === 3) t.innerHTML = "<span class='bad'>High Stress</span>";
+}
+
+/* ===== WAVE AI ===== */
+function updateAI() {
+  let msg = "✅ Operations stable.";
+
+  if (loans.length >= 3)
+    msg = "⚠️ High loan workload detected.";
+
+  if (stress === 3)
+    msg += "<br>🧠 High stress detected. Recommend workload balance.";
+
+  document.getElementById("aiText").innerHTML = msg;
+}
+
+/* ===== AUTO LOGIN ===== */
+if (user) {
+  showDashboard();
+}
+</script>
+
+</body>
+</html>
