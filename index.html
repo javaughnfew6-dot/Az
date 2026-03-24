@@ -2,40 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Wave AI Login</title>
+<title>Vault Assist — Wave AI</title>
 
 <style>
+/* ================= BASE ================= */
 body {
   margin: 0;
   height: 100vh;
-  background: linear-gradient(#021024, #032859);
   font-family: Arial, sans-serif;
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #0b4f6c, #021024 75%);
 }
 
-.card {
+/* Abstract ocean motion */
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 25% 35%, rgba(0,180,255,0.18), transparent 45%),
+    radial-gradient(circle at 75% 60%, rgba(0,120,220,0.18), transparent 45%);
+  animation: drift 14s linear infinite;
+}
+@keyframes drift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-50px); }
+  100% { transform: translateX(0); }
+}
+
+/* ================= WAVE (SVG DOLPHIN) ================= */
+#wave {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  animation: swimX 8s ease-in-out infinite,
+             bobY 4s ease-in-out infinite;
+  transition: all 1s ease;
+  z-index: 10;
+}
+#wave svg {
+  filter: drop-shadow(0 0 14px rgba(0,200,255,0.6));
+}
+
+@keyframes swimX {
+  0%   { transform: translate(-50%,-50%) scaleX(1); }
+  50%  { transform: translate(-25%,-55%) scaleX(-1); }
+  100% { transform: translate(-50%,-50%) scaleX(1); }
+}
+@keyframes bobY {
+  0% { top: 58%; }
+  50% { top: 62%; }
+  100% { top: 58%; }
+}
+
+/* Corner AI mode */
+.corner {
+  top: 14px !important;
+  left: 14px !important;
+  transform: scale(0.4) !important;
+  animation: none !important;
+}
+
+/* ================= LOGIN ================= */
+#login {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   background: rgba(255,255,255,0.08);
   padding: 30px;
-  border-radius: 20px;
   width: 320px;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(0,150,255,.6);
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0,150,255,0.6);
+  z-index: 20;
 }
 
-.wave {
-  font-size: 52px;
-  animation: rise 2s ease-out;
-}
-
-@keyframes rise {
-  from { transform: translateY(60px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-input {
+#login input {
   width: 100%;
   padding: 10px;
   margin: 6px 0;
@@ -43,88 +87,44 @@ input {
   border: none;
 }
 
-button {
-  margin-top: 10px;
+#login button {
   width: 100%;
   padding: 10px;
+  margin-top: 10px;
   background: #00aaff;
-  color: white;
   border: none;
   border-radius: 8px;
+  color: white;
   cursor: pointer;
 }
-</style>
-</head>
 
-<body>
-
-<div class="card">
-  <div class="wave">🐬</div>
-  <h2>Wave AI</h2>
-  <p>Hi, I’m Wave. Let’s start our day.</p>
-
-  <form action="dashboard.html">
-    <input placeholder="Full Name" required>
-    <input type="email" placeholder="Email" required>
-    <input type="password" placeholder="Password" required>
-    <button>Sign In</button>
-  </form>
-</div>
-
-</body>
-</html>
-``<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Vault Assist Dashboard</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #021024;
-  color: white;
-}
-
-/* Wave AI */
-.wave-ai {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  background: rgba(255,255,255,0.1);
-  padding: 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 0 18px rgba(0,150,255,0.6);
-}
-
-/* Layout */
-.main {
-  margin-left: 180px;
-  padding: 20px;
+/* ================= DASHBOARD ================= */
+#dashboard {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+  padding: 80px 20px 20px 180px;
 }
 
 .card {
   background: rgba(255,255,255,0.08);
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 14px;
   margin-bottom: 15px;
 }
 
-/* Loan bar */
 .progress {
   height: 18px;
   background: #0b2d55;
   border-radius: 10px;
   overflow: hidden;
 }
-.fill {
+.progress div {
   height: 100%;
   width: 67%;
   background: #00aaff;
 }
 
-/* Pie chart */
 .pie {
   width: 120px;
   height: 120px;
@@ -134,55 +134,133 @@ body {
     #ffaa00 55% 75%,
     #ff5555 75% 100%
   );
-  margin: 10px 0;
+}
+
+#chat {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 260px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 10px;
+  display: none;
+}
+#chat input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- Wave AI corner -->
-<div class="wave-ai">
-  🐬 <strong>Wave</strong><br>
-  Vault Assist AI
+<!-- WAVE SVG DOLPHIN -->
+<div id="wave">
+<svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 40
+           C25 20, 55 20, 75 35
+           C85 20, 105 15, 110 25
+           C100 30, 95 40, 90 45
+           C75 60, 45 60, 25 50
+           C20 55, 10 60, 8 55
+           C12 48, 12 44, 10 40Z"
+        fill="#00c2ff"/>
+  <circle cx="70" cy="34" r="2" fill="#021024"/>
+</svg>
 </div>
 
-<div class="main">
+<!-- LOGIN -->
+<div id="login">
+  <h2>Wave AI</h2>
+  <p>Hi, I’m Wave. Log in and we can start our day.</p>
+
+  <input id="name" placeholder="Full Name">
+  <input placeholder="Email">
+  <input type="password" placeholder="Password">
+  <button onclick="login()">Sign In</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
   <h1>Employee Dashboard</h1>
 
-  <!-- Loan percentage -->
   <div class="card">
     <h3>Loan Processing</h3>
-    <div class="progress">
-      <div class="fill"></div>
-    </div>
+    <div class="progress"><div></div></div>
     <p>67% of loans processed today</p>
   </div>
 
-  <!-- Mood pie -->
   <div class="card">
     <h3>Workplace Mood</h3>
     <div class="pie"></div>
     <p>Calm • Focused • Slight Stress</p>
   </div>
 
-  <!-- AI explanation -->
   <div class="card">
     <h3>Why You’re Feeling This Way</h3>
     <p>
-      Wave AI detected higher loan volume and deadline pressure.
+      Wave detected high loan volume and deadline pressure.
       Stress is moderate but productivity remains strong.
     </p>
   </div>
 
-  <!-- Loan requests -->
   <div class="card">
     <h3>Loan Requests</h3>
-    <p>• Auto</p>
-    <p>• Business</p>
-    <p>• Personal</p>
+    <p>• Auto — $9,200</p>
+    <p>• Business — $14,500</p>
+    <p>• Personal — $4,800</p>
   </div>
 </div>
+
+<!-- CHAT -->
+<div id="chat">
+  <strong>Ask Wave</strong>
+  <input placeholder="Ask Wave…" onkeydown="ask(event)">
+</div>
+
+<script>
+function speak(msg) {
+  const u = new SpeechSynthesisUtterance(msg);
+  u.rate = 1;
+  u.pitch = 1.2;
+  speechSynthesis.speak(u);
+}
+
+window.onload = () => {
+  setTimeout(() => {
+    speak("Hi, I’m Wave. Log in and we can start our day.");
+  }, 600);
+};
+
+function login() {
+  const name = document.getElementById("name").value || "Employee";
+  speak("Welcome " + name + ". I am now monitoring today's activity.");
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("dashboard").style.opacity = "1";
+  document.getElementById("dashboard").style.pointerEvents = "auto";
+  document.getElementById("chat").style.display = "block";
+  document.getElementById("wave").classList.add("corner");
+}
+
+function ask(e) {
+  if (e.key === "Enter") {
+    const t = e.target.value.toLowerCase();
+    e.target.value = "";
+
+    let reply =
+      t.includes("stress") ? "Stress is moderate but controlled." :
+      t.includes("loan") ? "Loan risk levels are stable." :
+      "I am monitoring systems and supporting you.";
+
+    speak(reply);
+  }
+}
+</script>
 
 </body>
 </html>
