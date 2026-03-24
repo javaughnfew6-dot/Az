@@ -2,311 +2,188 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>VaultAssist</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"
+<title>Wave AI Login</title>
 
 <style>
 body {
   margin: 0;
+  height: 100vh;
+  background: linear-gradient(#021024, #032859);
   font-family: Arial, sans-serif;
-  background: #eef6ff;
-}
-
-.hidden { display: none; }
-
-.login {
-  height: 100vh;
+  color: white;
   display: flex;
-  justify-content: center;
   align-items: center;
-}
-
-.box {
-  background: white;
-  padding: 30px;
-  width: 320px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.sidebar {
-  position: fixed;
-  width: 220px;
-  height: 100vh;
-  background: #0077cc;
-  color: white;
-  padding: 20px;
-}
-
-.main {
-  margin-left: 240px;
-  padding: 20px;
+  justify-content: center;
 }
 
 .card {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-.good { color: green; }
-.warn { color: orange; }
-.bad { color: red; }
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="loginScreen" class="login">
-  <div class="box">
-    <div style="font-size:40px;">🐬</div>
-    <h2>VaultAssist</h2>
-    <input id="nameInput" placeholder="Your name">
-    <select id="roleInput">
-      <option>Employee</option>
-      <option>Manager</option>
-    </select>
-    <button onclick="enter()">Enter Dashboard</button>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
-  <div class="sidebar">
-    <h2>VaultAssist</h2>
-    <p>📊 Analytics</p>
-    <p>💰 Loans</p>
-    <p>🧠 Wellness</p>
-    <p>🤖 Wave AI</p>
-    <p onclick="logout()" style="cursor:pointer;">🚪 Logout</p>
-  </div>
-
-  <div class="main">
-    <h1 id="welcomeText"></h1>
-
-    <div class="card">
-      <h3>Add Loan</h3>
-      <input id="customerInput" placeholder="Customer name">
-      <input id="amountInput" type="number" placeholder="Loan amount">
-      <button onclick="addLoan()">Add Loan</button>
-    </div>
-
-    <div class="card">
-      <h3>Loan List</h3>
-      <div id="loanList"></div>
-    </div>
-
-    <div class="card">
-      <h3>Workplace Insight</h3>
-      <button onclick="setStress(1)">Good</button>
-      <button onclick="setStress(2)">Neutral</button>
-      <button onclick="setStress(3)">Stressed</button>
-      <p id="stressText"></p>
-    </div>
-
-    <div class="card">
-      <h3>🐬 Wave AI Insight</h3>
-      <p id="aiText"></p>
-    </div>
-  </div>
-</div>
-
-<script>
-/* ===== DATA ===== */
-let loans = JSON.parse(localStorage.getItem("va_loans")) || [];
-let stress = Number(localStorage.getItem("va_stress")) || 1;
-let user = JSON.parse(localStorage.getItem("va_user"));
-
-/* ===== LOGIN ===== */
-function enter() {
-  const name = document.getElementById("nameInput").value;
-  const role = document.getElementById("roleInput").value;
-
-  user = { name, role };
-  localStorage.setItem("va_user", JSON.stringify(user));
-
-  showDashboard();
-}
-
-/* ===== LOGOUT ===== */
-function logout() {
-  localStorage.clear();
-  location.reload();
-}
-
-/* ===== DASHBOARD INIT ===== */
-function showDashboard() {
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-  document.getElementById("welcomeText").innerText =
-    `Welcome ${user.name} (${user.role})`;
-
-  renderLoans();
-  renderStress();
-  updateAI();
-}
-
-/* ===== LOANS ===== */
-function addLoan() {
-  const customer = document.getElementById("customerInput").value;
-  const amount = document.getElementById("amountInput").value;
-
-  if (!customer || !amount) {
-    alert("Fill all fields");
-    return;
-  }
-
-  loans.push({ customer, amount });
-  localStorage.setItem("va_loans", JSON.stringify(loans));
-
-  document.getElementById("customerInput").value = "";
-  document.getElementById("amountInput").value = "";
-
-  renderLoans();
-  updateAI();
-}
-
-function renderLoans() {
-  const list = document.getElementById("loanList");
-  list.innerHTML = "";
-
-  loans.forEach(l =>
-    list.innerHTML += `<p>${l.customer} – $${l.amount}</p>`
-  );
-}
-
-/* ===== STRESS ===== */
-function setStress(level) {
-  stress = level;
-  localStorage.setItem("va_stress", level);
-  renderStress();
-  updateAI();
-}
-
-function renderStress() {
-  const t = document.getElementById("stressText");
-
-  if (stress === 1) t.innerHTML = "<span class='good'>Healthy</span>";
-  if (stress === 2) t.innerHTML = "<span class='warn'>Moderate</span>";
-  if (stress === 3) t.innerHTML = "<span class='bad'>High Stress</span>";
-}
-
-/* ===== WAVE AI ===== */
-function updateAI() {
-  let msg = "✅ Operations stable.";
-
-  if (loans.length >= 3)
-    msg = "⚠️ High loan workload detected.";
-
-  if (stress === 3)
-    msg += "<br>🧠 High stress detected. Recommend workload balance.";
-
-  document.getElementById("aiText").innerHTML = msg;
-}
-
-/* ===== AUTO LOGIN ===== */
-if (user) {
-  showDashboard();
-}
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Azoul AI – Vault Assist</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #061a33, #0a2e5c);
-  margin: 0;
-  color: white;
-}
-
-.container {
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-}
-
-.box {
-  background: rgba(255,255,255,0.05);
-  padding: 35px;
-  border-radius: 18px;
-  box-shadow: 0 0 25px rgba(0,140,255,0.4);
-  width: 340px;
+  background: rgba(255,255,255,0.08);
+  padding: 30px;
+  border-radius: 20px;
+  width: 320px;
   text-align: center;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(0,150,255,.6);
 }
 
-.ai-icon {
-  font-size: 48px;
+.wave {
+  font-size: 52px;
+  animation: rise 2s ease-out;
+}
+
+@keyframes rise {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 input {
   width: 100%;
-  padding: 11px;
-  margin: 8px 0;
-  border-radius: 10px;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 8px;
   border: none;
-  outline: none;
 }
 
 button {
+  margin-top: 10px;
   width: 100%;
-  padding: 11px;
-  background: #008cff;
+  padding: 10px;
+  background: #00aaff;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 10px;
-  font-size: 15px;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
-  <div class="box">
-    <div class="ai-icon">🐬</div>
-    <h2>Azoul AI</h2>
-    <p>Vault Assist Intelligence</p>
 
-    <form action="dashboard.html">
-      <input type="text" placeholder="Full Name" required>
-      <input type="email" placeholder="Email Address" required>
-      <input type="password" placeholder="Password" required>
-      <button type="submit">Enter Azoul Dashboard</button>
-    </form>
+<div class="card">
+  <div class="wave">🐬</div>
+  <h2>Wave AI</h2>
+  <p>Hi, I’m Wave. Let’s start our day.</p>
+
+  <form action="dashboard.html">
+    <input placeholder="Full Name" required>
+    <input type="email" placeholder="Email" required>
+    <input type="password" placeholder="Password" required>
+    <button>Sign In</button>
+  </form>
+</div>
+
+</body>
+</html>
+``<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vault Assist Dashboard</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #021024;
+  color: white;
+}
+
+/* Wave AI */
+.wave-ai {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: rgba(255,255,255,0.1);
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(0,150,255,0.6);
+}
+
+/* Layout */
+.main {
+  margin-left: 180px;
+  padding: 20px;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+/* Loan bar */
+.progress {
+  height: 18px;
+  background: #0b2d55;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  width: 67%;
+  background: #00aaff;
+}
+
+/* Pie chart */
+.pie {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #00aaff 0% 55%,
+    #ffaa00 55% 75%,
+    #ff5555 75% 100%
+  );
+  margin: 10px 0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Wave AI corner -->
+<div class="wave-ai">
+  🐬 <strong>Wave</strong><br>
+  Vault Assist AI
+</div>
+
+<div class="main">
+  <h1>Employee Dashboard</h1>
+
+  <!-- Loan percentage -->
+  <div class="card">
+    <h3>Loan Processing</h3>
+    <div class="progress">
+      <div class="fill"></div>
+    </div>
+    <p>67% of loans processed today</p>
+  </div>
+
+  <!-- Mood pie -->
+  <div class="card">
+    <h3>Workplace Mood</h3>
+    <div class="pie"></div>
+    <p>Calm • Focused • Slight Stress</p>
+  </div>
+
+  <!-- AI explanation -->
+  <div class="card">
+    <h3>Why You’re Feeling This Way</h3>
+    <p>
+      Wave AI detected higher loan volume and deadline pressure.
+      Stress is moderate but productivity remains strong.
+    </p>
+  </div>
+
+  <!-- Loan requests -->
+  <div class="card">
+    <h3>Loan Requests</h3>
+    <p>• Auto</p>
+    <p>• Business</p>
+    <p>• Personal</p>
   </div>
 </div>
+
 </body>
 </html>
 ``
