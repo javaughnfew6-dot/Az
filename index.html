@@ -2,210 +2,241 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Azoul Web</title>
+<title>Azoul System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin: 0;
-  background: #f1f8ff;
   font-family: Arial, sans-serif;
+  background: #f4f9ff;
 }
 
-/* Core */
-.core {
-  position: absolute;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 18px 34px;
+/* ---------- SHARED ---------- */
+.hidden { display: none; }
+button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
   background: #0077cc;
   color: white;
-  border-radius: 50px;
-  font-size: 22px;
-  font-weight: bold;
+}
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
-/* Bubble Nodes */
+/* ---------- AZOUL VIEW ---------- */
+#azoulView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+}
+
+#azoulView img {
+  width: 180px;
+  margin-bottom: 20px;
+}
+
+.bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .bubble {
-  position: absolute;
-  width: 160px;
-  height: 160px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  background: #d9ecff;
+  background: #e3efff;
+  opacity: 0.4;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  opacity: 0.35;
   cursor: pointer;
   transition: 0.3s;
-  text-align: center;
 }
 
 .bubble img {
-  width: 48px;
-  margin-bottom: 6px;
+  width: 34px;
 }
 
 .bubble span {
-  font-weight: bold;
+  font-size: 10px;
+  margin-top: 4px;
 }
 
 .bubble.active {
-  background: #00bcd4;
-  color: white;
   opacity: 1;
-  box-shadow: 0 0 25px rgba(0,188,212,0.6);
+  background: #eafff4;
+  box-shadow:
+    0 0 12px rgba(0,255,150,0.6),
+    0 0 24px rgba(0,255,150,0.3);
 }
 
-/* Lines */
-svg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-/* Controls */
-.controls {
-  position: fixed;
-  bottom: 20px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-input, button {
-  padding: 10px 18px;
-  border-radius: 10px;
-}
-
-button {
-  background: #0077cc;
-  color: white;
-  border: none;
-}
-
-/* Dashboard */
-#dashboard {
-  display: none;
+/* ---------- DASHBOARD ---------- */
+#dashboardView {
   padding: 20px;
 }
 
-.company-grid {
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 80px);
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 16px;
 }
 
-.company {
-  text-align: center;
+.kpi {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.company img {
-  width: 48px;
+.chart {
+  height: 100px;
+  background: linear-gradient(
+    to top,
+    rgba(0,180,150,0.35),
+    rgba(0,180,150,0.05)
+  );
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+textarea {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid #ccc;
 }
 </style>
 </head>
 
 <body>
 
-<!-- WEB -->
-<div id="web">
-  <div class="core">Azoul 🌊</div>
+<!-- ========== AZOUL HOME ========== -->
+<div id="azoulView">
+  <img src="image.png" alt="Azoul Logo">
 
-  <svg>
-    <line x1="50%" y1="95" x2="20%" y2="260" stroke="#0077cc" />
-    <line x1="50%" y1="95" x2="50%" y2="260" stroke="#0077cc" />
-    <line x1="50%" y1="95" x2="80%" y2="260" stroke="#0077cc" />
-  </svg>
-
-  <div id="bank" class="bubble industry" style="top:230px; left:12%;" onclick="openDash('bank')">
-    <img src="https://cdn-icons-png.flaticon.com/512/483/483361.png">
-    <span>Banking</span>
-  </div>
-
-  <div id="health" class="bubble industry" style="top:230px; left:42%;" onclick="openDash('health')">
-    <img src="https://cdn-icons-png.flaticon.com/512/2967/2967354.png">
-    <span>Healthcare</span>
-  </div>
-
-  <div id="retail" class="bubble industry" style="top:230px; left:72%;" onclick="openDash('retail')">
-    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
-    <span>Retail</span>
+  <div class="bubbles">
+    <div class="bubble" data-company="bank" onclick="attemptAccess('bank')">
+      https://logo.clearbit.com/chase.com
+      <span>Bank</span>
+    </div>
+    <div class="bubble" data-company="retail" onclick="attemptAccess('retail')">
+      https://logo.clearbit.com/amazon.com
+      <span>Retail</span>
+    </div>
+    <div class="bubble" data-company="healthcare" onclick="attemptAccess('healthcare')">
+      https://logo.clearbit.com/cvs.com
+      <span>Healthcare</span>
+    </div>
+    <div class="bubble" data-company="warehouse" onclick="attemptAccess('warehouse')">
+      https://logo.clearbit.com/walmart.com
+      <span>Warehouse</span>
+    </div>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <button onclick="goBack()">⬅ Back</button>
-  <h2 id="dashTitle"></h2>
-  <div class="company-grid" id="companies"></div>
-</div>
+<!-- ========== DASHBOARD ========== -->
+<div id="dashboardView" class="hidden">
+  <div class="header">
+    <h2 id="dashTitle"></h2>
+    <button onclick="goBack()">Back</button>
+  </div>
 
-<!-- ACCESS -->
-<div class="controls">
-  <input id="codeInput" placeholder="Enter Azoul Access Code">
-  <button onclick="unlock()">Access</button>
+  <div class="dashboard">
+
+    <div class="card">
+      <div class="kpi" id="metric1"></div>
+      <div>Total Activity</div>
+      <div class="chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="kpi" id="metric2"></div>
+      <div>Engagement</div>
+      <div class="chart"></div>
+    </div>
+
+    <div class="card">
+      <h3>Harassment & Misconduct</h3>
+      <select>
+        <option>Harassment</option>
+        <option>Discrimination</option>
+        <option>Manager Abuse</option>
+        <option>Unsafe Conditions</option>
+      </select>
+      <textarea placeholder="Optional details (anonymous)"></textarea>
+      <button>Submit Anonymously</button>
+    </div>
+
+    <div class="card">
+      <h3>Why Might You Quit?</h3>
+      <label><input type="checkbox"> Burnout</label><br>
+      <label><input type="checkbox"> Harassment</label><br>
+      <label><input type="checkbox"> Poor Management</label><br>
+      <label><input type="checkbox"> Low Pay</label><br>
+      <label><input type="checkbox"> Mental Stress</label><br>
+      <button>Submit</button>
+    </div>
+
+  </div>
 </div>
 
 <script>
-const MASTER_CODE = "AZOUL-ACCESS";
-
-const companies = {
-  bank: [
-    {name:"Chase", icon:"https://logo.clearbit.com/chase.com"},
-    {name:"Bank of America", icon:"https://logo.clearbit.com/bankofamerica.com"}
-  ],
-  health: [
-    {name:"CVS", icon:"https://logo.clearbit.com/cvs.com"},
-    {name:"UnitedHealth", icon:"https://logo.clearbit.com/unitedhealthgroup.com"}
-  ],
-  retail: [
-    {name:"Amazon", icon:"https://logo.clearbit.com/amazon.com"},
-    {name:"Walmart", icon:"https://logo.clearbit.com/walmart.com"}
-  ]
+/* ---------- PASSWORDS ---------- */
+const PASSWORDS = {
+  bank: "AZOUL-BANK-001",
+  retail: "AZOUL-RETAIL-003",
+  healthcare: "AZOUL-HEALTH-002",
+  warehouse: "AZOUL-WARE-004"
 };
 
-function unlock() {
-  if (codeInput.value === MASTER_CODE) {
-    document.querySelectorAll(".industry")
-      .forEach(b => b.classList.add("active"));
+let currentCompany = null;
+
+/* ---------- ACCESS ---------- */
+function attemptAccess(company) {
+  const attempt = prompt("Enter password for " + company.toUpperCase());
+
+  if (attempt === PASSWORDS[company]) {
+    currentCompany = company;
+    document
+      .querySelector(`[data-company="${company}"]`)
+      .classList.add("active");
+    openDashboard(company);
   } else {
-    alert("Invalid access code");
+    alert("Incorrect password");
   }
 }
 
-function openDash(type) {
-  if (!document.getElementById(type).classList.contains("active")) return;
+/* ---------- DASHBOARD ---------- */
+function openDashboard(company) {
+  azoulView.classList.add("hidden");
+  dashboardView.classList.remove("hidden");
 
-  web.style.display = "none";
-  dashboard.style.display = "block";
-  dashTitle.innerText = type.toUpperCase() + " INDUSTRY";
-
-  companies[type].forEach(c => {
-    companiesDiv = document.getElementById("companies");
-    companiesDiv.innerHTML = "";
-    companies[type].forEach(c => {
-      companiesDiv.innerHTML += `
-        <div class="company">
-          <img src="${c.icon}">
-          <div>${c.name}</div>
-        </div>`;
-    });
-  });
+  dashTitle.innerText = "Azoul • " + company.toUpperCase();
+  metric1.innerText = Math.floor(Math.random()*9000 + 1000);
+  metric2.innerText = Math.floor(Math.random()*500 + 100);
 }
 
+/* ---------- BACK ---------- */
 function goBack() {
-  dashboard.style.display = "none";
-  web.style.display = "block";
-  document.getElementById("companies").innerHTML = "";
+  dashboardView.classList.add("hidden");
+  azoulView.classList.remove("hidden");
 }
 </script>
 
 </body>
 </html>
-``
