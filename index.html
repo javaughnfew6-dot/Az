@@ -1,242 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- ================= AZOUL WORKER SHIELD UPGRADE ================= --><!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Azoul System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Azoul</title>
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f9ff;
-}
+body { margin:0; font-family:Arial; background:#eaf6ff; }
+.center { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
+input { padding:10px; margin:5px; border-radius:6px; border:1px solid #ccc; }
+button { padding:10px 15px; margin-top:10px; background:#0077cc; color:white; border:none; border-radius:8px; cursor:pointer; }.grid { display:grid; grid-template-columns:repeat(3, 120px); gap:25px; margin-top:30px; } .circle { width:120px; height:120px; border-radius:50%; background:#ccc; display:flex; align-items:center; justify-content:center; flex-direction:column; opacity:0.5; cursor:pointer; } .active { background:#00cc88; opacity:1; } .hidden { display:none; } .dashboard { padding:20px; } .card { background:white; padding:15px; margin:10px 0; border-radius:10px; } .result { font-weight:bold; margin-top:10px; } </style>
 
-/* ---------- SHARED ---------- */
-.hidden { display: none; }
-button {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background: #0077cc;
-  color: white;
-}
-.card {
-  background: white;
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-}
-
-/* ---------- AZOUL VIEW ---------- */
-#azoulView {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 30px;
-}
-
-#azoulView img {
-  width: 180px;
-  margin-bottom: 20px;
-}
-
-.bubbles {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.bubble {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: #e3efff;
-  opacity: 0.4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.bubble img {
-  width: 34px;
-}
-
-.bubble span {
-  font-size: 10px;
-  margin-top: 4px;
-}
-
-.bubble.active {
-  opacity: 1;
-  background: #eafff4;
-  box-shadow:
-    0 0 12px rgba(0,255,150,0.6),
-    0 0 24px rgba(0,255,150,0.3);
-}
-
-/* ---------- DASHBOARD ---------- */
-#dashboardView {
-  padding: 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.dashboard {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-  gap: 16px;
-}
-
-.kpi {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.chart {
-  height: 100px;
-  background: linear-gradient(
-    to top,
-    rgba(0,180,150,0.35),
-    rgba(0,180,150,0.05)
-  );
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-textarea {
-  width: 100%;
-  height: 80px;
-  border-radius: 8px;
-  padding: 8px;
-  border: 1px solid #ccc;
-}
-</style>
 </head>
-
-<body>
-
-<!-- ========== AZOUL HOME ========== -->
-<div id="azoulView">
-  <img src="image.png" alt="Azoul Logo">
-
-  <div class="bubbles">
-    <div class="bubble" data-company="bank" onclick="attemptAccess('bank')">
-      https://logo.clearbit.com/chase.com
-      <span>Bank</span>
-    </div>
-    <div class="bubble" data-company="retail" onclick="attemptAccess('retail')">
-      https://logo.clearbit.com/amazon.com
-      <span>Retail</span>
-    </div>
-    <div class="bubble" data-company="healthcare" onclick="attemptAccess('healthcare')">
-      https://logo.clearbit.com/cvs.com
-      <span>Healthcare</span>
-    </div>
-    <div class="bubble" data-company="warehouse" onclick="attemptAccess('warehouse')">
-      https://logo.clearbit.com/walmart.com
-      <span>Warehouse</span>
-    </div>
+<body><!-- ENTRY --><div id="entry" class="center">
+  <h1>Azoul 🌊</h1>
+  <input id="codeInput" placeholder="Enter Code">
+  <button onclick="checkCode()">Unlock</button>  <div class="grid">
+    <div id="retail" class="circle" onclick="openDash('retail')">🛒<small>Retail</small></div>
   </div>
-</div>
-
-<!-- ========== DASHBOARD ========== -->
-<div id="dashboardView" class="hidden">
-  <div class="header">
-    <h2 id="dashTitle"></h2>
-    <button onclick="goBack()">Back</button>
+</div><!-- RETAIL DASHBOARD --><div id="retailDash" class="hidden dashboard">
+  <button onclick="goBack()">⬅ Back</button>
+  <h2>Worker Shield</h2>  <!-- PAY TRACKER -->  <div class="card">
+    <h3>💵 Pay Tracker</h3>
+    <input id="hours" placeholder="Hours Worked">
+    <input id="rate" placeholder="Hourly Pay">
+    <input id="tax" placeholder="Tax %">
+    <button onclick="calculatePay()">Calculate Pay</button>
+    <div id="payResult" class="result"></div>
+  </div>  <!-- EFFORT TRACKER -->  <div class="card">
+    <h3>⚡ Effort Tracker</h3>
+    <input id="customers" placeholder="Customers Handled">
+    <input id="incidents" placeholder="Incidents Faced">
+    <button onclick="analyzeEffort()">Analyze Effort</button>
+    <div id="effortResult" class="result"></div>
+  </div>  <!-- FAIRNESS RESULT -->  <div class="card">
+    <h3>📊 Work vs Pay Insight</h3>
+    <div id="fairnessResult" class="result"></div>
   </div>
+</div><script>
+let unlocked = null;
 
-  <div class="dashboard">
-
-    <div class="card">
-      <div class="kpi" id="metric1"></div>
-      <div>Total Activity</div>
-      <div class="chart"></div>
-    </div>
-
-    <div class="card">
-      <div class="kpi" id="metric2"></div>
-      <div>Engagement</div>
-      <div class="chart"></div>
-    </div>
-
-    <div class="card">
-      <h3>Harassment & Misconduct</h3>
-      <select>
-        <option>Harassment</option>
-        <option>Discrimination</option>
-        <option>Manager Abuse</option>
-        <option>Unsafe Conditions</option>
-      </select>
-      <textarea placeholder="Optional details (anonymous)"></textarea>
-      <button>Submit Anonymously</button>
-    </div>
-
-    <div class="card">
-      <h3>Why Might You Quit?</h3>
-      <label><input type="checkbox"> Burnout</label><br>
-      <label><input type="checkbox"> Harassment</label><br>
-      <label><input type="checkbox"> Poor Management</label><br>
-      <label><input type="checkbox"> Low Pay</label><br>
-      <label><input type="checkbox"> Mental Stress</label><br>
-      <button>Submit</button>
-    </div>
-
-  </div>
-</div>
-
-<script>
-/* ---------- PASSWORDS ---------- */
-const PASSWORDS = {
-  bank: "AZOUL-BANK-001",
-  retail: "AZOUL-RETAIL-003",
-  healthcare: "AZOUL-HEALTH-002",
-  warehouse: "AZOUL-WARE-004"
-};
-
-let currentCompany = null;
-
-/* ---------- ACCESS ---------- */
-function attemptAccess(company) {
-  const attempt = prompt("Enter password for " + company.toUpperCase());
-
-  if (attempt === PASSWORDS[company]) {
-    currentCompany = company;
-    document
-      .querySelector(`[data-company="${company}"]`)
-      .classList.add("active");
-    openDashboard(company);
+function checkCode() {
+  let code = document.getElementById("codeInput").value;
+  if (code === "RET789") {
+    unlocked = "retail";
+    document.getElementById("retail").classList.add("active");
   } else {
-    alert("Incorrect password");
+    alert("Wrong code");
   }
 }
 
-/* ---------- DASHBOARD ---------- */
-function openDashboard(company) {
-  azoulView.classList.add("hidden");
-  dashboardView.classList.remove("hidden");
-
-  dashTitle.innerText = "Azoul • " + company.toUpperCase();
-  metric1.innerText = Math.floor(Math.random()*9000 + 1000);
-  metric2.innerText = Math.floor(Math.random()*500 + 100);
+function openDash(type) {
+  if (type !== unlocked) return;
+  document.getElementById("entry").classList.add("hidden");
+  document.getElementById("retailDash").classList.remove("hidden");
 }
 
-/* ---------- BACK ---------- */
 function goBack() {
-  dashboardView.classList.add("hidden");
-  azoulView.classList.remove("hidden");
+  document.getElementById("entry").classList.remove("hidden");
+  document.getElementById("retailDash").classList.add("hidden");
 }
-</script>
 
-</body>
+function calculatePay() {
+  let hours = parseFloat(document.getElementById("hours").value) || 0;
+  let rate = parseFloat(document.getElementById("rate").value) || 0;
+  let tax = parseFloat(document.getElementById("tax").value) || 0;
+
+  let gross = hours * rate;
+  let net = gross - (gross * (tax / 100));
+
+  document.getElementById("payResult").innerText = "Take-home Pay: $" + net.toFixed(2);
+}
+
+function analyzeEffort() {
+  let customers = parseInt(document.getElementById("customers").value) || 0;
+  let incidents = parseInt(document.getElementById("incidents").value) || 0;
+
+  let effortScore = customers + (incidents * 5);
+
+  let result = "";
+  if (effortScore > 100) result = "High Effort";
+  else if (effortScore > 50) result = "Moderate Effort";
+  else result = "Low Effort";
+
+  document.getElementById("effortResult").innerText = result;
+
+  // fairness logic
+  let payText = document.getElementById("payResult").innerText;
+  if (!payText) return;
+
+  if (effortScore > 100) document.getElementById("fairnessResult").innerText = "⚠️ High effort compared to pay";
+  else document.getElementById("fairnessResult").innerText = "✅ Pay seems fair";
+}
+</script></body>
 </html>
