@@ -1,94 +1,224 @@
-<!-- ================= AZOUL WORKER SHIELD UPGRADE ================= --><!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Azoul Worker Shield</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Azoul</title>
+
 <style>
 body { margin:0; font-family:Arial; background:#eaf6ff; }
 .center { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
-input { padding:10px; margin:5px; border-radius:6px; border:1px solid #ccc; }
-button { padding:10px 15px; margin-top:10px; background:#0077cc; color:white; border:none; border-radius:8px; cursor:pointer; }.grid { display:grid; grid-template-columns:repeat(3, 120px); gap:25px; margin-top:30px; } .circle { width:120px; height:120px; border-radius:50%; background:#ccc; display:flex; align-items:center; justify-content:center; flex-direction:column; opacity:0.5; cursor:pointer; } .active { background:#00cc88; opacity:1; } .hidden { display:none; } .dashboard { padding:20px; } .card { background:white; padding:15px; margin:10px 0; border-radius:10px; } .result { font-weight:bold; margin-top:10px; } </style>
-
+input, textarea, select {
+  padding:10px; margin:5px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+button {
+  padding:10px 15px;
+  background:#0077cc;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.hidden { display:none; }
+.dashboard { padding:20px; }
+.card {
+  background:white;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
+}
+.result { font-weight:bold; margin-top:10px; }
+.alert { color:#c40000; font-weight:bold; }
+.safe { color:#009966; font-weight:bold; }
+canvas { max-width:280px; }
+</style>
 </head>
-<body><!-- ENTRY --><div id="entry" class="center">
-  <h1>Azoul 🌊</h1>
-  <input id="codeInput" placeholder="Enter Code">
-  <button onclick="checkCode()">Unlock</button>  <div class="grid">
-    <div id="retail" class="circle" onclick="openDash('retail')">🛒<small>Retail</small></div>
-  </div>
-</div><!-- RETAIL DASHBOARD --><div id="retailDash" class="hidden dashboard">
+
+<body>
+
+<!-- ENTRY -->
+<div id="entry" class="center">
+  <h1>Azoul 🌊 Worker Shield</h1>
+  <input id="codeInput" placeholder="Enter Employee or Manager Code">
+  <button onclick="checkCode()">Unlock</button>
+</div>
+
+<!-- EMPLOYEE DASHBOARD -->
+<div id="employeeDash" class="hidden dashboard">
   <button onclick="goBack()">⬅ Back</button>
-  <h2>Worker Shield</h2>  <!-- PAY TRACKER -->  <div class="card">
+  <h2>🛡 Employee Dashboard</h2>
+
+  <!-- PAY TRACKER -->
+  <div class="card">
     <h3>💵 Pay Tracker</h3>
     <input id="hours" placeholder="Hours Worked">
     <input id="rate" placeholder="Hourly Pay">
     <input id="tax" placeholder="Tax %">
     <button onclick="calculatePay()">Calculate Pay</button>
     <div id="payResult" class="result"></div>
-  </div>  <!-- EFFORT TRACKER -->  <div class="card">
+  </div>
+
+  <!-- EFFORT TRACKER -->
+  <div class="card">
     <h3>⚡ Effort Tracker</h3>
     <input id="customers" placeholder="Customers Handled">
     <input id="incidents" placeholder="Incidents Faced">
     <button onclick="analyzeEffort()">Analyze Effort</button>
     <div id="effortResult" class="result"></div>
-  </div>  <!-- FAIRNESS RESULT -->  <div class="card">
+  </div>
+
+  <!-- FAIRNESS -->
+  <div class="card">
     <h3>📊 Work vs Pay Insight</h3>
     <div id="fairnessResult" class="result"></div>
   </div>
-</div><script>
-let unlocked = null;
+
+  <!-- VOICE / REPORT -->
+  <div class="card">
+    <h3>🗣 Speak Up (Anonymous)</h3>
+    <select id="issueType">
+      <option>Pay Issues</option>
+      <option>Harassment</option>
+      <option>Unsafe Conditions</option>
+      <option>Burnout / Overwork</option>
+    </select>
+    <textarea id="issueText" placeholder="Describe the issue"></textarea>
+    <button onclick="submitReport()">Submit Report</button>
+    <div id="employeeStatus" class="safe"></div>
+  </div>
+
+  <div class="card">
+    <h3>⚖️ Protection Notice</h3>
+    <p>You are legally protected from retaliation when reporting unsafe or unfair work conditions.</p>
+  </div>
+</div>
+
+<!-- MANAGER DASHBOARD -->
+<div id="managerDash" class="hidden dashboard">
+  <button onclick="goBack()">⬅ Back</button>
+  <h2>📊 Manager Risk & Report Dashboard</h2>
+
+  <div class="card">
+    <h3>📈 Issue Distribution</h3>
+    <canvas id="pieChart" width="300" height="300"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>⚠️ If Issues Are Ignored</h3>
+    <ul>
+      <li>Lawsuits & settlements</li>
+      <li>Labor board & OSHA audits</li>
+      <li>Employee walkouts</li>
+      <li>Brand and investor damage</li>
+    </ul>
+    <p class="alert">Unresolved reports = higher legal risk</p>
+  </div>
+
+  <div class="card">
+    <h3>📁 Anonymous Employee Reports</h3>
+    <div id="reportList"></div>
+  </div>
+</div>
+
+<script>
+let reports = JSON.parse(localStorage.getItem("reports") || "[]");
 
 function checkCode() {
-  let code = document.getElementById("codeInput").value;
-  if (code === "RET789") {
-    unlocked = "retail";
-    document.getElementById("retail").classList.add("active");
-  } else {
-    alert("Wrong code");
+  const code = document.getElementById("codeInput").value.trim();
+
+  if (code === "EMP-8820") {
+    entry.classList.add("hidden");
+    employeeDash.classList.remove("hidden");
+  }
+  else if (code === "MGR-4451") {
+    entry.classList.add("hidden");
+    managerDash.classList.remove("hidden");
+    loadManagerData();
+  }
+  else {
+    alert("Invalid Code");
   }
 }
 
-function openDash(type) {
-  if (type !== unlocked) return;
-  document.getElementById("entry").classList.add("hidden");
-  document.getElementById("retailDash").classList.remove("hidden");
-}
-
 function goBack() {
-  document.getElementById("entry").classList.remove("hidden");
-  document.getElementById("retailDash").classList.add("hidden");
+  entry.classList.remove("hidden");
+  employeeDash.classList.add("hidden");
+  managerDash.classList.add("hidden");
 }
 
 function calculatePay() {
-  let hours = parseFloat(document.getElementById("hours").value) || 0;
-  let rate = parseFloat(document.getElementById("rate").value) || 0;
-  let tax = parseFloat(document.getElementById("tax").value) || 0;
+  let hours = +hoursInput.value || 0;
+}
+
+function calculatePay() {
+  let hours = Number(document.getElementById("hours").value) || 0;
+  let rate = Number(document.getElementById("rate").value) || 0;
+  let tax = Number(document.getElementById("tax").value) || 0;
 
   let gross = hours * rate;
-  let net = gross - (gross * (tax / 100));
+  let net = gross - (gross * tax / 100);
 
-  document.getElementById("payResult").innerText = "Take-home Pay: $" + net.toFixed(2);
+  payResult.innerText = "Take-home Pay: $" + net.toFixed(2);
 }
 
 function analyzeEffort() {
-  let customers = parseInt(document.getElementById("customers").value) || 0;
-  let incidents = parseInt(document.getElementById("incidents").value) || 0;
+  let customers = Number(customers.value) || 0;
+  let incidents = Number(incidents.value) || 0;
 
-  let effortScore = customers + (incidents * 5);
+  let effort = customers + incidents * 5;
 
-  let result = "";
-  if (effortScore > 100) result = "High Effort";
-  else if (effortScore > 50) result = "Moderate Effort";
-  else result = "Low Effort";
+  effortResult.innerText =
+    effort > 100 ? "High Effort" :
+    effort > 50 ? "Moderate Effort" :
+    "Low Effort";
 
-  document.getElementById("effortResult").innerText = result;
-
-  // fairness logic
-  let payText = document.getElementById("payResult").innerText;
-  if (!payText) return;
-
-  if (effortScore > 100) document.getElementById("fairnessResult").innerText = "⚠️ High effort compared to pay";
-  else document.getElementById("fairnessResult").innerText = "✅ Pay seems fair";
+  fairnessResult.innerText =
+    effort > 100 ? "⚠️ High effort compared to pay" : "✅ Pay seems fair";
 }
-</script></body>
+
+function submitReport() {
+  const type = issueType.value;
+  const text = issueText.value.trim();
+  if (!text) return alert("Please describe the issue.");
+
+  reports.push({ type, date:new Date().toLocaleDateString() });
+  localStorage.setItem("reports", JSON.stringify(reports));
+
+  issueText.value = "";
+  employeeStatus.innerText = "✅ Report submitted safely.";
+}
+
+function loadManagerData() {
+  reportList.innerHTML = reports.map(r =>
+    `<p>• <b>${r.type}</b> — ${r.date}</p>`
+  ).join("");
+
+  const counts = {};
+  reports.forEach(r => counts[r.type] = (counts[r.type] || 0) + 1);
+  drawPie(counts);
+}
+
+function drawPie(data) {
+  const ctx = pieChart.getContext("2d");
+  let total = Object.values(data).reduce((a,b)=>a+b,0);
+  let angle = 0;
+  const colors = ["#ff7777","#ffcc66","#66cc99","#6699ff"];
+
+  ctx.clearRect(0,0,300,300);
+
+  Object.keys(data).forEach((k,i)=>{
+    let slice = (data[k]/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,120,angle,angle+slice);
+    ctx.fillStyle = colors[i%colors.length];
+    ctx.fill();
+    angle += slice;
+  });
+}
+</script>
+
+</body>
 </html>
