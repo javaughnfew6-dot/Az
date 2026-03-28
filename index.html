@@ -1,224 +1,159 @@
-<!DOCTYPE html>
-<html lang="en">
+<!-- ================= AZOUL COMPLETE SYSTEM (ALL-IN-ONE CODE) ================= --><!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Azoul Worker Shield</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Azoul</title>
 <style>
 body { margin:0; font-family:Arial; background:#eaf6ff; }
 .center { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
-input, textarea, select {
-  padding:10px; margin:5px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-button {
-  padding:10px 15px;
-  background:#0077cc;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
+input, textarea, select { padding:10px; margin:5px; border-radius:6px; border:1px solid #ccc; width:250px; }
+button { padding:10px 15px; margin-top:10px; background:#0077cc; color:white; border:none; border-radius:8px; cursor:pointer; }
 .hidden { display:none; }
 .dashboard { padding:20px; }
-.card {
-  background:white;
-  padding:15px;
-  margin:10px 0;
-  border-radius:10px;
-}
-.result { font-weight:bold; margin-top:10px; }
-.alert { color:#c40000; font-weight:bold; }
-.safe { color:#009966; font-weight:bold; }
-canvas { max-width:280px; }
+.card { background:white; padding:15px; margin:10px 0; border-radius:10px; }
+canvas { max-width:300px; }
 </style>
 </head>
-
-<body>
-
-<!-- ENTRY -->
-<div id="entry" class="center">
-  <h1>Azoul 🌊 Worker Shield</h1>
-  <input id="codeInput" placeholder="Enter Employee or Manager Code">
-  <button onclick="checkCode()">Unlock</button>
-</div>
-
-<!-- EMPLOYEE DASHBOARD -->
-<div id="employeeDash" class="hidden dashboard">
+<body><div id="entry" class="center">
+  <h1>Azoul 🌊</h1>
+  <input id="codeInput" placeholder="Enter Code">
+  <button onclick="checkCode()">Enter</button>
+</div><div id="employeeDash" class="hidden dashboard">
   <button onclick="goBack()">⬅ Back</button>
-  <h2>🛡 Employee Dashboard</h2>
-
-  <!-- PAY TRACKER -->
-  <div class="card">
-    <h3>💵 Pay Tracker</h3>
-    <input id="hours" placeholder="Hours Worked">
-    <input id="rate" placeholder="Hourly Pay">
+  <h2 id="industryTitle"></h2>  <div class="card">
+    <h3>💵 Pay</h3>
+    <input id="hours" placeholder="Hours">
+    <input id="rate" placeholder="Rate">
     <input id="tax" placeholder="Tax %">
-    <button onclick="calculatePay()">Calculate Pay</button>
-    <div id="payResult" class="result"></div>
-  </div>
-
-  <!-- EFFORT TRACKER -->
-  <div class="card">
-    <h3>⚡ Effort Tracker</h3>
-    <input id="customers" placeholder="Customers Handled">
-    <input id="incidents" placeholder="Incidents Faced">
-    <button onclick="analyzeEffort()">Analyze Effort</button>
-    <div id="effortResult" class="result"></div>
-  </div>
-
-  <!-- FAIRNESS -->
-  <div class="card">
-    <h3>📊 Work vs Pay Insight</h3>
-    <div id="fairnessResult" class="result"></div>
-  </div>
-
-  <!-- VOICE / REPORT -->
-  <div class="card">
-    <h3>🗣 Speak Up (Anonymous)</h3>
-    <select id="issueType">
-      <option>Pay Issues</option>
-      <option>Harassment</option>
-      <option>Unsafe Conditions</option>
-      <option>Burnout / Overwork</option>
+    <button onclick="calcPay()">Calculate</button>
+    <div id="payResult"></div>
+  </div>  <div class="card">
+    <h3>⚡ Effort</h3>
+    <input id="customers" placeholder="Customers">
+    <input id="incidents" placeholder="Incidents">
+    <button onclick="effort()">Analyze</button>
+    <div id="effortResult"></div>
+  </div>  <div class="card">
+    <h3>📝 Report</h3>
+    <select id="category">
+      <option>Customer</option>
+      <option>Coworker</option>
+      <option>Manager</option>
     </select>
-    <textarea id="issueText" placeholder="Describe the issue"></textarea>
-    <button onclick="submitReport()">Submit Report</button>
-    <div id="employeeStatus" class="safe"></div>
+    <button onclick="report()">Submit</button>
   </div>
-
-  <div class="card">
-    <h3>⚖️ Protection Notice</h3>
-    <p>You are legally protected from retaliation when reporting unsafe or unfair work conditions.</p>
-  </div>
-</div>
-
-<!-- MANAGER DASHBOARD -->
-<div id="managerDash" class="hidden dashboard">
+</div><div id="managerDash" class="hidden dashboard">
   <button onclick="goBack()">⬅ Back</button>
-  <h2>📊 Manager Risk & Report Dashboard</h2>
-
-  <div class="card">
-    <h3>📈 Issue Distribution</h3>
-    <canvas id="pieChart" width="300" height="300"></canvas>
+  <h2 id="managerTitle"></h2>  <div class="card">
+    <h3>Total Reports</h3>
+    <div id="total"></div>
+  </div>  <div class="card">
+    <h3>Pie Chart</h3>
+    <canvas id="pie"></canvas>
+  </div>  <div class="card">
+    <h3>Bar Graph</h3>
+    <canvas id="bar"></canvas>
   </div>
+</div><script>
+let role="";
+let industry="";
 
-  <div class="card">
-    <h3>⚠️ If Issues Are Ignored</h3>
-    <ul>
-      <li>Lawsuits & settlements</li>
-      <li>Labor board & OSHA audits</li>
-      <li>Employee walkouts</li>
-      <li>Brand and investor damage</li>
-    </ul>
-    <p class="alert">Unresolved reports = higher legal risk</p>
-  </div>
+function checkCode(){
+  let code=codeInput.value.toUpperCase();
 
-  <div class="card">
-    <h3>📁 Anonymous Employee Reports</h3>
-    <div id="reportList"></div>
-  </div>
-</div>
+  if(code.includes("-E")) role="employee";
+  else if(code.includes("-M")) role="manager";
+  else return alert("Invalid code");
 
-<script>
-let reports = JSON.parse(localStorage.getItem("reports") || "[]");
+  if(code.startsWith("RET")) industry="Retail";
+  else if(code.startsWith("BNK")) industry="Banking";
+  else if(code.startsWith("HLT")) industry="Healthcare";
+  else if(code.startsWith("AIR")) industry="Airline";
+  else if(code.startsWith("CON")) industry="Construction";
+  else if(code.startsWith("OIL")) industry="Oil";
+  else if(code.startsWith("RES")) industry="Restaurant";
+  else if(code.startsWith("FST")) industry="Fast Food";
+  else if(code.startsWith("CAR")) industry="Car Dealership";
+  else if(code.startsWith("TRK")) industry="Trucking";
+  else return alert("Unknown industry");
 
-function checkCode() {
-  const code = document.getElementById("codeInput").value.trim();
+  entry.classList.add("hidden");
 
-  if (code === "EMP-8820") {
-    entry.classList.add("hidden");
+  if(role==="employee"){
+    industryTitle.innerText=industry;
     employeeDash.classList.remove("hidden");
-  }
-  else if (code === "MGR-4451") {
-    entry.classList.add("hidden");
+  } else {
+    managerTitle.innerText=industry+" Insights";
     managerDash.classList.remove("hidden");
-    loadManagerData();
-  }
-  else {
-    alert("Invalid Code");
+    updateCharts();
   }
 }
 
-function goBack() {
+function goBack(){
   entry.classList.remove("hidden");
   employeeDash.classList.add("hidden");
   managerDash.classList.add("hidden");
 }
 
-function calculatePay() {
-  let hours = +hoursInput.value || 0;
+function getData(){
+  return JSON.parse(localStorage.getItem(industry)||"[]");
 }
 
-function calculatePay() {
-  let hours = Number(document.getElementById("hours").value) || 0;
-  let rate = Number(document.getElementById("rate").value) || 0;
-  let tax = Number(document.getElementById("tax").value) || 0;
-
-  let gross = hours * rate;
-  let net = gross - (gross * tax / 100);
-
-  payResult.innerText = "Take-home Pay: $" + net.toFixed(2);
+function saveData(d){
+  localStorage.setItem(industry, JSON.stringify(d));
 }
 
-function analyzeEffort() {
-  let customers = Number(customers.value) || 0;
-  let incidents = Number(incidents.value) || 0;
-
-  let effort = customers + incidents * 5;
-
-  effortResult.innerText =
-    effort > 100 ? "High Effort" :
-    effort > 50 ? "Moderate Effort" :
-    "Low Effort";
-
-  fairnessResult.innerText =
-    effort > 100 ? "⚠️ High effort compared to pay" : "✅ Pay seems fair";
+function calcPay(){
+  let net=(hours.value*rate.value)*(1-tax.value/100);
+  payResult.innerText="$"+net.toFixed(2);
 }
 
-function submitReport() {
-  const type = issueType.value;
-  const text = issueText.value.trim();
-  if (!text) return alert("Please describe the issue.");
-
-  reports.push({ type, date:new Date().toLocaleDateString() });
-  localStorage.setItem("reports", JSON.stringify(reports));
-
-  issueText.value = "";
-  employeeStatus.innerText = "✅ Report submitted safely.";
+function effort(){
+  let score=(+customers.value)+(+incidents.value*5);
+  effortResult.innerText=score>100?"High":score>50?"Medium":"Low";
 }
 
-function loadManagerData() {
-  reportList.innerHTML = reports.map(r =>
-    `<p>• <b>${r.type}</b> — ${r.date}</p>`
-  ).join("");
-
-  const counts = {};
-  reports.forEach(r => counts[r.type] = (counts[r.type] || 0) + 1);
-  drawPie(counts);
+function report(){
+  let d=getData();
+  d.push({cat:category.value});
+  saveData(d);
+  alert("Report saved");
 }
 
-function drawPie(data) {
-  const ctx = pieChart.getContext("2d");
-  let total = Object.values(data).reduce((a,b)=>a+b,0);
-  let angle = 0;
-  const colors = ["#ff7777","#ffcc66","#66cc99","#6699ff"];
+function updateCharts(){
+  let d=getData();
+  total.innerText=d.length;
 
-  ctx.clearRect(0,0,300,300);
+  let counts={Customer:0,Coworker:0,Manager:0};
+  d.forEach(r=>counts[r.cat]++);
 
-  Object.keys(data).forEach((k,i)=>{
-    let slice = (data[k]/total)*Math.PI*2;
-    ctx.beginPath();
-    ctx.moveTo(150,150);
-    ctx.arc(150,150,120,angle,angle+slice);
-    ctx.fillStyle = colors[i%colors.length];
-    ctx.fill();
-    angle += slice;
+  let colors=["#ff6384","#36a2eb","#ffce56"];
+
+  let p=pie.getContext("2d");
+  p.clearRect(0,0,300,300);
+  let totalCount=d.length||1,start=0,i=0;
+  Object.entries(counts).forEach(([k,v])=>{
+    let slice=(v/totalCount)*Math.PI*2;
+    p.fillStyle=colors[i];
+    p.beginPath();
+    p.moveTo(150,150);
+    p.arc(150,150,100,start,start+slice);
+    p.fill();
+    p.fillStyle="#000";
+    p.fillText(k,10,20+i*20);
+    start+=slice;i++;
+  });
+
+  let b=bar.getContext("2d");
+  b.clearRect(0,0,300,300);
+  i=0;
+  Object.entries(counts).forEach(([k,v])=>{
+    b.fillStyle=colors[i];
+    b.fillRect(50+i*80,300-v*20,40,v*20);
+    b.fillStyle="#000";
+    b.fillText(k,50+i*80,290);
+    i++;
   });
 }
-</script>
-
-</body>
+</script></body>
 </html>
