@@ -6,60 +6,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root {
-  --blue:#0a6cff;
-  --light:#eaf6ff;
-  --white:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
+:root{
+--blue:#0a6cff;
+--light:#f5f9ff;
+--white:#ffffff;
+--text:#0f172a;
+--muted:#6b7280;
+--border:#dbeafe;
+--warn:#f59e0b;
+--danger:#ef4444;
 }
-body {
-  margin:0;
-  font-family:system-ui, sans-serif;
-  background:var(--light);
-  color:var(--text);
+
+body{
+margin:0;
+font-family:Inter,system-ui,-apple-system,sans-serif;
+background:var(--light);
+color:var(--text);
 }
-.center {
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
+
+.center{min-height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column}
+.card{
+background:var(--white);
+padding:24px;
+border-radius:14px;
+width:92%;
+max-width:560px;
+box-shadow:0 14px 40px rgba(0,0,0,.08);
+margin-bottom:20px
 }
-.card {
-  background:var(--white);
-  padding:20px;
-  border-radius:16px;
-  width:92%;
-  max-width:420px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.08);
-  margin-bottom:16px;
+
+h2,h3,h4{margin:0 0 10px;font-weight:600}
+label{font-size:14px;color:var(--muted);display:block;margin-top:12px}
+input,select,textarea,button{
+width:100%;padding:12px;margin-top:6px;border-radius:8px;
+border:1px solid var(--border);font-size:15px
 }
-input, select, textarea, button {
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:10px;
-  border:1px solid #dbeafe;
+button{background:var(--blue);color:white;border:none;font-weight:600;cursor:pointer}
+button.secondary{background:#e5efff;color:var(--blue)}
+.hidden{display:none}
+.small{font-size:13px;color:var(--muted)}
+.metric{display:flex;justify-content:space-between;margin:6px 0}
+.issue{border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px}
+.issue-actions{display:flex;gap:8px;margin-top:8px}
+canvas{margin:18px auto;display:block}
+
+.banner{
+padding:14px;border-radius:10px;margin-bottom:16px;
+font-weight:600
 }
-button {
-  background:var(--blue);
-  border:none;
-  color:white;
-  font-size:16px;
-}
-.hidden { display:none; }
-.small { font-size:14px; color:var(--muted); }
-.issue {
-  border:1px solid #dbeafe;
-  border-radius:10px;
-  padding:10px;
-  margin-top:8px;
-}
-.issue button {
-  margin-top:6px;
-  font-size:14px;
-}
+.banner.warn{background:#fff7ed;color:var(--warn)}
+.banner.danger{background:#fee2e2;color:var(--danger)}
+.banner.ok{background:#ecfeff;color:#0369a1}
 </style>
 </head>
 
@@ -67,161 +64,215 @@ button {
 
 <!-- ENTRY -->
 <div id="entry" class="center">
-  <div class="card">
-    <h2>Azoul 🌊</h2>
-    <p class="small">Enter Azoul code</p>
-    <input id="codeInput" placeholder="AZ-101-E1 or AZ-101-M1">
-    <button onclick="enter()">Continue</button>
-  </div>
+<div class="card">
+<h2>Azoul</h2>
+<p class="small">Enter your Azoul access code</p>
+<input id="codeInput" placeholder="AZ-101-E1 or AZ-101-M1">
+<button onclick="enter()">Continue</button>
+</div>
 </div>
 
 <!-- EMPLOYEE -->
 <div id="employee" class="center hidden">
-  <div class="card">
-    <h3>Anonymous Check‑In</h3>
+<div class="card">
+<h3>Anonymous Check‑In</h3>
 
-    <label>How do you feel?</label>
-    <select id="pulse">
-      <option value="1">😔 Stressed</option>
-      <option value="2">😐 Neutral</option>
-      <option value="3">🙂 Good</option>
-    </select>
+<label>Department (optional)</label>
+<select id="department">
+<option value="">Select department</option>
+<option>Sales</option>
+<option>Operations</option>
+<option>Support</option>
+<option>Engineering</option>
+<option>Other</option>
+</select>
 
-    <label>Concern category (optional)</label>
-    <select id="category">
-      <option value="">None</option>
-      <option>Management</option>
-      <option>Workload</option>
-      <option>Coworkers</option>
-      <option>Safety</option>
-      <option>Other</option>
-    </select>
+<label>How was this week?</label>
+<select id="pulse">
+<option value="1">Stressed</option>
+<option value="2">Neutral</option>
+<option value="3">Good</option>
+</select>
 
-    <textarea id="note" maxlength="280"
-      placeholder="Optional (never shown directly to managers)"></textarea>
+<label>Concern category (optional)</label>
+<select id="category">
+<option value="">None</option>
+<option>Management</option>
+<option>Workload</option>
+<option>Coworkers</option>
+<option>Safety</option>
+<option>Other</option>
+</select>
 
-    <button onclick="submitEmployee()">Submit</button>
-    <p class="small">Your identity is never collected.</p>
-  </div>
+<textarea id="note" maxlength="280" placeholder="Optional (never shown directly to managers)"></textarea>
+
+<button onclick="submitEmployee()">Submit</button>
+<p class="small">No names. No logins. Anonymous by design.</p>
+</div>
 </div>
 
 <!-- MANAGER -->
 <div id="manager" class="center hidden">
-  <div class="card">
-    <h3>Team Health Dashboard</h3>
-    <div id="summary"></div>
+<div class="card">
+<h3>Team Health Overview</h3>
 
-    <h4>Open Issues</h4>
-    <div id="issues"></div>
-  </div>
+<div id="alert"></div>
+
+<div id="summary"></div>
+
+<h4>Pulse Trend (Over Time)</h4>
+<canvas id="lineChart" width="320" height="160"></canvas>
+
+<h4>Open Issues by Category</h4>
+<canvas id="pieChart" width="240" height="240"></canvas>
+
+<h4>Departments with Open Issues</h4>
+<canvas id="deptChart" width="240" height="240"></canvas>
+
+<h4 style="margin-top:20px;">Open Issues</h4>
+<div id="issues"></div>
+</div>
 </div>
 
 <script>
-/* ================== STATE ================== */
-let businessId = "";
+let businessId="";
 
-/* ================== HELPERS ================== */
-function nowWeek() {
-  const d = new Date();
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+function nowWeek(){
+const d=new Date();
+return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 }
-function load(key, def){ return JSON.parse(localStorage.getItem(key) || JSON.stringify(def)); }
-function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+const load=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 
-/* ================== ENTRY ================== */
-function enter() {
-  let code = codeInput.value.trim();
-  if(!code.startsWith("AZ-")) return alert("Invalid code");
-
-  let parts = code.split("-");
-  businessId = parts[0] + "-" + parts[1]; // AZ-101
-
-  entry.classList.add("hidden");
-  if(code.includes("-E")) employee.classList.remove("hidden");
-  else if(code.includes("-M")) loadManager();
-  else alert("Invalid role");
+function enter(){
+const code=codeInput.value.trim();
+if(!code.startsWith("AZ-"))return alert("Invalid code");
+const p=code.split("-");
+businessId=p[0]+"-"+p[1];
+entry.classList.add("hidden");
+code.includes("-E")?employee.classList.remove("hidden"):loadManager();
 }
 
-/* ================== EMPLOYEE ================== */
-function submitEmployee() {
-  const week = nowWeek();
-  let health = load("health", {});
-  let concerns = load("concerns", []);
+function submitEmployee(){
+const week=nowWeek();
+const health=load("health",{});
+const concerns=load("concerns",[]);
 
-  health[businessId] = health[businessId] || {};
-  health[businessId][week] = health[businessId][week] || { pulses:[] };
+health[businessId]??={};
+health[businessId][week]??={pulses:[]};
+health[businessId][week].pulses.push(+pulse.value);
 
-  health[businessId][week].pulses.push(+pulse.value);
-
-  if(category.value){
-    concerns.push({
-      businessId, week,
-      category:category.value,
-      status:"open"
-    });
-  }
-
-  save("health", health);
-  save("concerns", concerns);
-
-  alert("Submitted safely ✅");
-  note.value = "";
+if(category.value){
+concerns.push({
+businessId,week,
+category:category.value,
+department:department.value||"Unspecified",
+status:"open"
+});
+}
+save("health",health);save("concerns",concerns);
+alert("Submitted successfully");
 }
 
-/* ================== MANAGER ================== */
-function burnoutScore(pulses, reports){
-  if(!pulses.length) return 0;
-  let avg = pulses.reduce((a,b)=>a+b) / pulses.length;
-  let stressed = pulses.filter(p=>p===1).length / pulses.length;
-  let score = 0;
-  if(avg <= 1.5) score += 30;
-  if(stressed > 0.5) score += 20;
-  if(reports > 3) score += 25;
-  return Math.min(score,100);
+function burnout(pulses,reports){
+let s=0;
+if(pulses.length){
+const avg=pulses.reduce((a,b)=>a+b)/pulses.length;
+const stress=pulses.filter(p=>p===1).length/pulses.length;
+if(avg<=1.5)s+=30;
+if(stress>0.5)s+=20;
+}
+if(reports>3)s+=25;
+return Math.min(s,100);
 }
 
 function loadManager(){
-  manager.classList.remove("hidden");
+manager.classList.remove("hidden");
 
-  const week = nowWeek();
-  const health = load("health", {});
-  const concerns = load("concerns", []).filter(c=>c.businessId===businessId);
+const week=nowWeek();
+const health=load("health",{});
+let concerns=load("concerns",[]).filter(c=>c.businessId===businessId);
+const open=concerns.filter(c=>c.status==="open");
+const resolvedThisWeek=concerns.filter(c=>c.status==="resolved"&&c.week===week).length;
 
-  const pulses = (health[businessId]?.[week]?.pulses || []);
-  const openIssues = concerns.filter(c=>c.status==="open");
+const pulses=health[businessId]?.[week]?.pulses||[];
+const score=burnout(pulses,open.length);
 
-  const score = burnoutScore(pulses, openIssues.length);
-  const level = score>=80?"🚨 Critical":score>=60?"🔥 High":score>=30?"⚠️ Watch":"✅ Stable";
+alert.innerHTML=score>=80?
+`<div class="banner danger">Critical burnout risk — immediate action required</div>`:
+score>=60?
+`<div class="banner warn">Burnout risk rising — monitor closely</div>`:
+`<div class="banner ok">Team health stable</div>`;
 
-  summary.innerHTML = `
-    <p><b>Weekly Avg Pulse:</b> ${pulses.length?(pulses.reduce((a,b)=>a+b)/pulses.length).toFixed(2):"N/A"}</p>
-    <p><b>Burnout Score:</b> ${score} — ${level}</p>
-  `;
+summary.innerHTML=`
+<div class="metric"><span>Avg Pulse</span><b>${pulses.length?(pulses.reduce((a,b)=>a+b)/pulses.length).toFixed(2):"N/A"}</b></div>
+<div class="metric"><span>Open Issues</span><b>${open.length}</b></div>
+<div class="metric"><span>Resolved This Week</span><b>${resolvedThisWeek}</b></div>
+<div class="metric"><span>Burnout Score</span><b>${score}</b></div>
+`;
 
-  issues.innerHTML = "";
-  openIssues.forEach((c,i)=>{
-    const div = document.createElement("div");
-    div.className="issue";
-    div.innerHTML = `
-      <b>${c.category}</b><br>
-      <button onclick="resolve(${i})">✅ Resolve</button>
-      <button onclick="dismiss(${i})">🗑️ Dismiss</button>
-    `;
-    issues.appendChild(div);
-  });
+drawLine(health[businessId]||{});
+drawPie(open,"category","pieChart");
+drawPie(open,"department","deptChart");
+renderIssues(open);
 }
 
-function resolve(i){ updateStatus(i,"resolved"); }
-function dismiss(i){ updateStatus(i,"dismissed"); }
+function drawLine(data){
+const ctx=lineChart.getContext("2d");
+ctx.clearRect(0,0,320,160);
+const weeks=Object.keys(data).sort();
+if(!weeks.length)return;
+ctx.beginPath();ctx.strokeStyle="#0a6cff";ctx.lineWidth=3;
+weeks.forEach((w,i)=>{
+const avg=data[w].pulses.reduce((a,b)=>a+b)/data[w].pulses.length;
+const x=i*(320/(weeks.length-1||1));
+const y=160-(avg/3)*140;
+i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+});
+ctx.stroke();
+}
 
-function updateStatus(index, status){
-  let concerns = load("concerns", []);
-  let open = concerns.filter(c=>c.businessId===businessId && c.status==="open");
-  open[index].status = status;
-  save("concerns", concerns);
-  loadManager();
+function drawPie(list,key,canvasId){
+const ctx=document.getElementById(canvasId).getContext("2d");
+ctx.clearRect(0,0,240,240);
+const map={};
+list.forEach(i=>map[i[key]]=(map[i[key]]||0)+1);
+const total=Object.values(map).reduce((a,b)=>a+b,0);
+if(!total)return;
+let start=0;
+["#0a6cff","#60a5fa","#93c5fd","#2563eb","#1e40af"].forEach((c,i)=>{
+const val=Object.values(map)[i];
+if(!val)return;
+const angle=(val/total)*Math.PI*2;
+ctx.beginPath();ctx.moveTo(120,120);ctx.fillStyle=c;
+ctx.arc(120,120,100,start,start+angle);ctx.fill();
+start+=angle;
+});
+}
+
+function renderIssues(open){
+issues.innerHTML="";
+open.forEach((c,i)=>{
+const div=document.createElement("div");
+div.className="issue";
+div.innerHTML=`
+<b>${c.category}</b> — ${c.department}
+<div class="issue-actions">
+<button class="secondary" onclick="update(${i},'resolved')">Resolve</button>
+<button class="secondary" onclick="update(${i},'dismissed')">Dismiss</button>
+</div>`;
+issues.appendChild(div);
+});
+}
+
+function update(i,status){
+const data=load("concerns",[]);
+data.filter(c=>c.businessId===businessId&&c.status==="open")[i].status=status;
+save("concerns",data);
+loadManager();
 }
 </script>
 
 </body>
 </html>
+``
