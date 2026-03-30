@@ -2,46 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Azoul</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+:root {
+  --blue:#0a6cff;
+  --light:#eaf6ff;
+  --white:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+}
 body {
   margin:0;
-  font-family:Arial, sans-serif;
-  background:#eaf6ff;
+  font-family:system-ui, sans-serif;
+  background:var(--light);
+  color:var(--text);
 }
 .center {
+  min-height:100vh;
   display:flex;
-  flex-direction:column;
-  align-items:center;
   justify-content:center;
-  height:100vh;
+  align-items:center;
+  flex-direction:column;
 }
-input, select {
+.card {
+  background:var(--white);
+  padding:20px;
+  border-radius:16px;
+  width:92%;
+  max-width:420px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  margin-bottom:16px;
+}
+input, select, textarea, button {
+  width:100%;
   padding:10px;
-  margin:6px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  width:260px;
+  margin-top:8px;
+  border-radius:10px;
+  border:1px solid #dbeafe;
 }
 button {
-  padding:10px 16px;
-  background:#0077cc;
-  color:white;
+  background:var(--blue);
   border:none;
-  border-radius:8px;
-  cursor:pointer;
+  color:white;
+  font-size:16px;
 }
 .hidden { display:none; }
-.dashboard { padding:20px; }
-.card {
-  background:white;
-  padding:15px;
-  margin:12px 0;
-  border-radius:12px;
+.small { font-size:14px; color:var(--muted); }
+.issue {
+  border:1px solid #dbeafe;
+  border-radius:10px;
+  padding:10px;
+  margin-top:8px;
 }
-.small { color:#666; font-size:14px; }
+.issue button {
+  margin-top:6px;
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -49,157 +67,161 @@ button {
 
 <!-- ENTRY -->
 <div id="entry" class="center">
-  <h1>Azoul 🌊</h1>
-  <p class="small">Enter your business code</p>
-  <input id="codeInput" placeholder="AZ-coffes001-E">
-  <button onclick="checkCode()">Enter</button>
+  <div class="card">
+    <h2>Azoul 🌊</h2>
+    <p class="small">Enter Azoul code</p>
+    <input id="codeInput" placeholder="AZ-101-E1 or AZ-101-M1">
+    <button onclick="enter()">Continue</button>
+  </div>
 </div>
 
-<!-- EMPLOYEE DASH -->
-<div id="employeeDash" class="hidden dashboard">
-  <button onclick="goBack()">⬅ Back</button>
-  <h2 id="employeeTitle"></h2>
-
-  <!-- PAY -->
+<!-- EMPLOYEE -->
+<div id="employee" class="center hidden">
   <div class="card">
-    <h3>💵 Pay & Labor</h3>
-    <input id="hours" placeholder="Hours worked">
-    <input id="rate" placeholder="Hourly rate">
-    <input id="tax" placeholder="Tax %">
-    <button onclick="calcPay()">Calculate</button>
-    <div id="payResult"></div>
-  </div>
+    <h3>Anonymous Check‑In</h3>
 
-  <!-- EFFORT -->
-  <div class="card">
-    <h3>⚡ Effort & Stress</h3>
-    <input id="customers" placeholder="Customers served">
-    <input id="incidents" placeholder="Incidents">
-    <button onclick="effort()">Analyze</button>
-    <div id="effortResult"></div>
-  </div>
-
-  <!-- REPORT -->
-  <div class="card">
-    <h3>📝 Report</h3>
-    <select id="category">
-      <option>Customer</option>
-      <option>Coworker</option>
-      <option>Manager</option>
+    <label>How do you feel?</label>
+    <select id="pulse">
+      <option value="1">😔 Stressed</option>
+      <option value="2">😐 Neutral</option>
+      <option value="3">🙂 Good</option>
     </select>
-    <button onclick="report()">Submit</button>
+
+    <label>Concern category (optional)</label>
+    <select id="category">
+      <option value="">None</option>
+      <option>Management</option>
+      <option>Workload</option>
+      <option>Coworkers</option>
+      <option>Safety</option>
+      <option>Other</option>
+    </select>
+
+    <textarea id="note" maxlength="280"
+      placeholder="Optional (never shown directly to managers)"></textarea>
+
+    <button onclick="submitEmployee()">Submit</button>
+    <p class="small">Your identity is never collected.</p>
   </div>
 </div>
 
-<!-- MANAGER DASH -->
-<div id="managerDash" class="hidden dashboard">
-  <button onclick="goBack()">⬅ Back</button>
-  <h2 id="managerTitle"></h2>
-
-  <!-- SUMMARY -->
+<!-- MANAGER -->
+<div id="manager" class="center hidden">
   <div class="card">
-    <h3>📊 Daily Business Summary</h3>
+    <h3>Team Health Dashboard</h3>
     <div id="summary"></div>
+
+    <h4>Open Issues</h4>
+    <div id="issues"></div>
   </div>
 </div>
 
 <script>
-/* ================= CORE STATE ================= */
-let role = "";
-let business = "";
-let industry = "Retail"; // default for now
-let revenueToday = 632;  // demo value
+/* ================== STATE ================== */
+let businessId = "";
 
-/* ================= AUTH ================= */
-function checkCode(){
-  // Format: AZ-coffes001-E
+/* ================== HELPERS ================== */
+function nowWeek() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function load(key, def){ return JSON.parse(localStorage.getItem(key) || JSON.stringify(def)); }
+function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+/* ================== ENTRY ================== */
+function enter() {
   let code = codeInput.value.trim();
-  let match = code.match(/^AZ-([a-zA-Z]+)(\d{3})-(E|M)$/);
+  if(!code.startsWith("AZ-")) return alert("Invalid code");
 
-  if(!match) return alert("Invalid Azoul code format");
-
-  business = match[1]; // coffes
-  role = match[3] === "E" ? "employee" : "manager";
+  let parts = code.split("-");
+  businessId = parts[0] + "-" + parts[1]; // AZ-101
 
   entry.classList.add("hidden");
+  if(code.includes("-E")) employee.classList.remove("hidden");
+  else if(code.includes("-M")) loadManager();
+  else alert("Invalid role");
+}
 
-  if(role === "employee"){
-    employeeTitle.innerText = `${industry} – ${business}`;
-    employeeDash.classList.remove("hidden");
-  } else {
-    managerTitle.innerText = `${industry} – ${business} Insights`;
-    managerDash.classList.remove("hidden");
-    updateManagerSummary();
+/* ================== EMPLOYEE ================== */
+function submitEmployee() {
+  const week = nowWeek();
+  let health = load("health", {});
+  let concerns = load("concerns", []);
+
+  health[businessId] = health[businessId] || {};
+  health[businessId][week] = health[businessId][week] || { pulses:[] };
+
+  health[businessId][week].pulses.push(+pulse.value);
+
+  if(category.value){
+    concerns.push({
+      businessId, week,
+      category:category.value,
+      status:"open"
+    });
   }
+
+  save("health", health);
+  save("concerns", concerns);
+
+  alert("Submitted safely ✅");
+  note.value = "";
 }
 
-function goBack(){
-  entry.classList.remove("hidden");
-  employeeDash.classList.add("hidden");
-  managerDash.classList.add("hidden");
+/* ================== MANAGER ================== */
+function burnoutScore(pulses, reports){
+  if(!pulses.length) return 0;
+  let avg = pulses.reduce((a,b)=>a+b) / pulses.length;
+  let stressed = pulses.filter(p=>p===1).length / pulses.length;
+  let score = 0;
+  if(avg <= 1.5) score += 30;
+  if(stressed > 0.5) score += 20;
+  if(reports > 3) score += 25;
+  return Math.min(score,100);
 }
 
-/* ================= STORAGE ================= */
-function getData(){
-  return JSON.parse(localStorage.getItem(business) || "[]");
-}
+function loadManager(){
+  manager.classList.remove("hidden");
 
-function saveData(d){
-  localStorage.setItem(business, JSON.stringify(d));
-}
+  const week = nowWeek();
+  const health = load("health", {});
+  const concerns = load("concerns", []).filter(c=>c.businessId===businessId);
 
-/* ================= PAY / LABOR ================= */
-function calcPay(){
-  let h = +hours.value;
-  let r = +rate.value;
-  let t = +tax.value;
+  const pulses = (health[businessId]?.[week]?.pulses || []);
+  const openIssues = concerns.filter(c=>c.status==="open");
 
-  let gross = h * r;
-  let net = gross * (1 - t / 100);
-  let laborPct = (gross / revenueToday) * 100;
-
-  payResult.innerHTML = `
-    💰 Net Pay: <b>$${net.toFixed(2)}</b><br>
-    👥 Labor Cost: <b>${laborPct.toFixed(1)}%</b>
-    ${laborPct <= 35 ? "✅ Healthy" : "⚠️ High"}
-  `;
-}
-
-/* ================= EFFORT ================= */
-function effort(){
-  let c = +customers.value || 1;
-  let i = +incidents.value;
-
-  let rate = (i / c) * 100;
-
-  effortResult.innerHTML = `
-    ⚠️ Incident Rate: <b>${rate.toFixed(1)}%</b><br>
-    ${rate > 5 ? "Recommend more staff during rush" : "Operations stable ✅"}
-  `;
-}
-
-/* ================= REPORT ================= */
-function report(){
-  let d = getData();
-  d.push({ category: category.value, time: Date.now() });
-  saveData(d);
-  alert("Report submitted");
-}
-
-/* ================= MANAGER SUMMARY ================= */
-function updateManagerSummary(){
-  let d = getData();
-  let incidentCount = d.length;
-  let laborDemo = ((8 * 18) / revenueToday) * 100;
+  const score = burnoutScore(pulses, openIssues.length);
+  const level = score>=80?"🚨 Critical":score>=60?"🔥 High":score>=30?"⚠️ Watch":"✅ Stable";
 
   summary.innerHTML = `
-    📈 Revenue Today: <b>$${revenueToday}</b><br>
-    📝 Reports Filed: <b>${incidentCount}</b><br>
-    👥 Labor Cost: <b>${laborDemo.toFixed(1)}%</b>
-      ${laborDemo <= 35 ? "✅" : "⚠️"}<br>
-    ⚠️ Risk Level: <b>${incidentCount > 5 ? "High" : "Low"}</b>
+    <p><b>Weekly Avg Pulse:</b> ${pulses.length?(pulses.reduce((a,b)=>a+b)/pulses.length).toFixed(2):"N/A"}</p>
+    <p><b>Burnout Score:</b> ${score} — ${level}</p>
   `;
+
+  issues.innerHTML = "";
+  openIssues.forEach((c,i)=>{
+    const div = document.createElement("div");
+    div.className="issue";
+    div.innerHTML = `
+      <b>${c.category}</b><br>
+      <button onclick="resolve(${i})">✅ Resolve</button>
+      <button onclick="dismiss(${i})">🗑️ Dismiss</button>
+    `;
+    issues.appendChild(div);
+  });
+}
+
+function resolve(i){ updateStatus(i,"resolved"); }
+function dismiss(i){ updateStatus(i,"dismissed"); }
+
+function updateStatus(index, status){
+  let concerns = load("concerns", []);
+  let open = concerns.filter(c=>c.businessId===businessId && c.status==="open");
+  open[index].status = status;
+  save("concerns", concerns);
+  loadManager();
 }
 </script>
+
 </body>
 </html>
