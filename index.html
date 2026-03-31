@@ -115,7 +115,7 @@ button.secondary{
   <div class="card">
     <h2>Azoul</h2>
     <p class="small">🔒 Anonymous. No logins.</p>
-    <input id="codeInput" placeholder="Enter code (e.g. A1E)">
+    <input id="codeInput" placeholder="Enter code (e.g. AZ1E)">
     <button onclick="enterApp()">Continue</button>
   </div>
 </div>
@@ -131,7 +131,28 @@ button.secondary{
       <option value="2">😐 Okay</option>
       <option value="3">🙂 Good</option>
       <option value="4">😄 Great</option>
-    </select>
+    </select><label>How did you feel overall this week?</label>
+<select class="pulse-input" data-key="overall">
+  <option value="1">😔 Overwhelmed</option>
+  <option value="2">😐 Okay</option>
+  <option value="3">🙂 Good</option>
+  <option value="4">😄 Great</option>
+<select class="pulse-input" data-key="workload">
+  <option value="1">😔 Too much</option>
+  <option value="2">😐 Manageable</option>
+  <option value="3">🙂 Comfortable</option>
+  <option value="4">😄 Very balanced</option>
+<select class="pulse-input" data-key="support">
+  <option value="1">😔 Not supported</option>
+  <option value="2">😐 Somewhat supported</option>
+  <option value="3">🙂 Supported</option>
+  <option value="4">😄 Very supported</option>
+<label>How was your energy level at work?</label>
+<select class="pulse-input" data-key="energy">
+  <option value="1">😔 Drained</option>
+  <option value="2">😐 Neutral</option>
+  <option value="3">🙂 Energized</option>
+</select>
 
     <label>Concern category (optional)</label>
     <select id="category">
