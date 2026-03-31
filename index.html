@@ -6,16 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-/* ===== GLOBAL STYLE ===== */
 body{
   margin:0;
-  font-family:system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:system-ui,-apple-system,sans-serif;
   background:#0b1220;
   color:#e5e7eb;
 }
-
 .hidden{display:none}
-
 .center{
   min-height:100vh;
   display:flex;
@@ -23,7 +20,6 @@ body{
   align-items:center;
   flex-direction:column;
 }
-
 .card{
   background:#111827;
   padding:20px;
@@ -32,7 +28,6 @@ body{
   max-width:1000px;
   margin-bottom:20px;
 }
-
 input,select,button{
   width:100%;
   padding:12px;
@@ -43,53 +38,36 @@ input,select,button{
   border-radius:8px;
   font-size:15px;
 }
-
 button{
   background:#2563eb;
   border:none;
-  cursor:pointer;
   font-weight:600;
+  cursor:pointer;
 }
-
-button:disabled{
-  opacity:0.5;
-  cursor:not-allowed;
-}
-
-h2,h3{
-  margin:0 0 10px;
-}
-
 .metric-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
   gap:14px;
   margin-top:16px;
 }
-
 .metric{
   background:#020617;
   border:1px solid #1e293b;
   border-radius:10px;
   padding:14px;
-  text-align:left;
 }
-
 .metric h4{
   margin:0;
-  font-size:13px;
   color:#94a3b8;
+  font-size:13px;
 }
-
 .metric p{
-  font-size:30px;
   margin-top:8px;
+  font-size:30px;
 }
-
 .placeholder{
-  opacity:0.35;
+  opacity:.35;
 }
-
 .issue{
   background:#020617;
   border-radius:8px;
@@ -101,23 +79,23 @@ h2,h3{
 
 <body>
 
-<!-- ===== ENTRY ===== -->
+<!-- ENTRY -->
 <div id="entry" class="center">
   <div class="card" style="max-width:420px;">
     <h2>Azoul</h2>
-    <input id="codeInput" placeholder="Enter access code (A1E or A1M)">
+    <input id="codeInput" placeholder="Enter code (A1E or A1M)">
     <button onclick="enter()">Continue</button>
   </div>
 </div>
 
-<!-- ===== EMPLOYEE ===== -->
+<!-- EMPLOYEE -->
 <div id="employee" class="center hidden">
   <div class="card" style="max-width:420px;">
     <h3>Anonymous Employee Check‑In</h3>
 
     <label>What issue are you experiencing?</label>
     <select id="category">
-      <option value="">Select an issue</option>
+      <option value="">Select issue</option>
       <option>Workload</option>
       <option>Management</option>
       <option>Burnout</option>
@@ -128,12 +106,12 @@ h2,h3{
   </div>
 </div>
 
-<!-- ===== MANAGER ===== -->
+<!-- MANAGER -->
 <div id="manager" class="center hidden">
 
-  <!-- Visual shell matching HR dashboard -->
+  <!-- HR Analytics Image -->
   <div class="card">
-    <img src="hr-dashboard.png" style="width:100%;border-radius:10px;">
+    hr-dashboard.png
   </div>
 
   <!-- Metrics -->
@@ -141,26 +119,11 @@ h2,h3{
     <h3>HR Analytics Dashboard</h3>
 
     <div class="metric-grid">
-      <div class="metric">
-        <h4>Employee Count</h4>
-        <p id="empCount" class="placeholder">—</p>
-      </div>
-      <div class="metric">
-        <h4>Attrition Count</h4>
-        <p id="attrCount" class="placeholder">—</p>
-      </div>
-      <div class="metric">
-        <h4>Attrition Rate</h4>
-        <p id="attrRate" class="placeholder">—</p>
-      </div>
-      <div class="metric">
-        <h4>Active Employees</h4>
-        <p id="activeCount" class="placeholder">—</p>
-      </div>
-      <div class="metric">
-        <h4>Avg. Age</h4>
-        <p id="avgAge" class="placeholder">—</p>
-      </div>
+      <div class="metric"><h4>Employee Count</h4><p id="empCount" class="placeholder">—</p></div>
+      <div class="metric"><h4>Attrition Count</h4><p id="attrCount" class="placeholder">—</p></div>
+      <div class="metric"><h4>Attrition Rate</h4><p id="attrRate" class="placeholder">—</p></div>
+      <div class="metric"><h4>Active Employees</h4><p id="activeCount" class="placeholder">—</p></div>
+      <div class="metric"><h4>Avg Age</h4><p id="avgAge" class="placeholder">—</p></div>
     </div>
   </div>
 
@@ -173,20 +136,28 @@ h2,h3{
 </div>
 
 <script>
-/* ================= DATA ================= */
-function load(key,def){return JSON.parse(localStorage.getItem(key)||JSON.stringify(def))}
-function save(key,val){localStorage.setItem(key,JSON.stringify(val))}
+/* ================= PASSWORDS ================= */
+
+const EMPLOYEE_CODES = ["A1E","A1E1","A1E2","A1E3","A1E4","A1E5"];
+const MANAGER_CODES  = ["A1M","A1M1","A1M2","A1M3","A1M4","A1M5"];
+
+/* ================= STORAGE ================= */
+
+function load(k,d){return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
 /* ================= ROUTING ================= */
+
 function enter(){
   const code = codeInput.value.trim().toUpperCase();
   entry.classList.add("hidden");
 
-  if(code==="A1E"){
+  if(EMPLOYEE_CODES.includes(code)){
     employee.classList.remove("hidden");
     return;
   }
-  if(code==="A1M"){
+
+  if(MANAGER_CODES.includes(code)){
     manager.classList.remove("hidden");
     loadManager();
     return;
@@ -197,24 +168,24 @@ function enter(){
 }
 
 /* ================= EMPLOYEE ================= */
+
 function submitEmployee(){
-  if(!category.value){
-    alert("Please select an issue");
-    return;
-  }
+  if(!category.value){ alert("Please select an issue"); return; }
+
   const data = load("issues",[]);
-  data.push({category:category.value});
-  save("issues",data);
+  data.push({ category: category.value });
+  save("issues", data);
+
   alert("Submitted anonymously");
   category.value="";
 }
 
 /* ================= MANAGER ================= */
+
 function loadManager(){
   const issues = load("issues",[]);
-  if(issues.length===0) return;
+  if(issues.length === 0) return;
 
-  // Populate metrics only after data exists
   empCount.textContent = "1,233";
   attrCount.textContent = issues.length;
   attrRate.textContent = (issues.length * 2) + "%";
@@ -224,12 +195,14 @@ function loadManager(){
   document.querySelectorAll(".placeholder")
     .forEach(el=>el.classList.remove("placeholder"));
 
+  issuesDiv = document.getElementById("issues");
   issuesDiv.innerHTML = "";
+
   issues.forEach(i=>{
-    const div=document.createElement("div");
+    const div = document.createElement("div");
     div.className="issue";
-    div.textContent=i.category;
-    issues.appendChild(div);
+    div.textContent = i.category;
+    issuesDiv.appendChild(div);
   });
 }
 </script>
