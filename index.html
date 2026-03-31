@@ -65,9 +65,7 @@ button{
   margin-top:8px;
   font-size:30px;
 }
-.placeholder{
-  opacity:.35;
-}
+.placeholder{opacity:.35}
 .issue{
   background:#020617;
   border-radius:8px;
@@ -84,7 +82,7 @@ button{
   <div class="card" style="max-width:420px;">
     <h2>Azoul</h2>
     <input id="codeInput" placeholder="Enter code (A1E or A1M)">
-    <button onclick="enter()">Continue</button>
+    <button type="button" onclick="enterApp()">Continue</button>
   </div>
 </div>
 
@@ -102,7 +100,7 @@ button{
       <option>Safety</option>
     </select>
 
-    <button onclick="submitEmployee()">Submit</button>
+    <button type="button" onclick="submitEmployee()">Submit</button>
   </div>
 </div>
 
@@ -111,7 +109,7 @@ button{
 
   <!-- HR Analytics Image -->
   <div class="card">
-    hr-dashboard.png
+    <img src="hr-dashboard.png" style="width:100%;border-radius:8px;" alt="HR Analytics Dashboard">
   </div>
 
   <!-- Metrics -->
@@ -136,27 +134,26 @@ button{
 </div>
 
 <script>
-/* ================= PASSWORDS ================= */
-
+/* ===== PASSWORDS ===== */
 const EMPLOYEE_CODES = ["A1E","A1E1","A1E2","A1E3","A1E4","A1E5"];
 const MANAGER_CODES  = ["A1M","A1M1","A1M2","A1M3","A1M4","A1M5"];
 
-/* ================= STORAGE ================= */
-
+/* ===== STORAGE ===== */
 function load(k,d){return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}
 function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
-/* ================= ROUTING ================= */
-
-function enter(){
+/* ===== ROUTING ===== */
+function enterApp(){
   const code = codeInput.value.trim().toUpperCase();
+
   entry.classList.add("hidden");
+  employee.classList.add("hidden");
+  manager.classList.add("hidden");
 
   if(EMPLOYEE_CODES.includes(code)){
     employee.classList.remove("hidden");
     return;
   }
-
   if(MANAGER_CODES.includes(code)){
     manager.classList.remove("hidden");
     loadManager();
@@ -167,41 +164,39 @@ function enter(){
   entry.classList.remove("hidden");
 }
 
-/* ================= EMPLOYEE ================= */
-
+/* ===== EMPLOYEE ===== */
 function submitEmployee(){
-  if(!category.value){ alert("Please select an issue"); return; }
-
+  if(!category.value){
+    alert("Select an issue first");
+    return;
+  }
   const data = load("issues",[]);
   data.push({ category: category.value });
-  save("issues", data);
-
+  save("issues",data);
   alert("Submitted anonymously");
   category.value="";
 }
 
-/* ================= MANAGER ================= */
-
+/* ===== MANAGER ===== */
 function loadManager(){
-  const issues = load("issues",[]);
-  if(issues.length === 0) return;
+  const data = load("issues",[]);
+  if(data.length===0) return;
 
   empCount.textContent = "1,233";
-  attrCount.textContent = issues.length;
-  attrRate.textContent = (issues.length * 2) + "%";
-  activeCount.textContent = 1233 - issues.length;
+  attrCount.textContent = data.length;
+  attrRate.textContent = (data.length*2)+"%";
+  activeCount.textContent = 1233 - data.length;
   avgAge.textContent = "37";
 
   document.querySelectorAll(".placeholder")
     .forEach(el=>el.classList.remove("placeholder"));
 
-  issuesDiv = document.getElementById("issues");
-  issuesDiv.innerHTML = "";
-
-  issues.forEach(i=>{
-    const div = document.createElement("div");
+  const issuesDiv=document.getElementById("issues");
+  issuesDiv.innerHTML="";
+  data.forEach(i=>{
+    const div=document.createElement("div");
     div.className="issue";
-    div.textContent = i.category;
+    div.textContent=i.category;
     issuesDiv.appendChild(div);
   });
 }
