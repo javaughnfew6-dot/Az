@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,113 +15,101 @@
   --border:#dbeafe;
 }
 
-/* ===== Background ===== */
 body{
   margin:0;
   font-family:Inter, system-ui, sans-serif;
-  background:
-    url("azoul-bg.png") no-repeat center center fixed,
-    var(--light);
-  background-size:280px;
+  background:#f5f9ff;
   color:var(--text);
 }
 
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:rgba(245,249,255,0.86);
-  pointer-events:none;
-  z-index:0;
-}
-
 .center{
-  position:relative;
-  z-index:1;
   min-height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   flex-direction:column;
 }
 
 .card{
-  background:var(--white);
+  background:white;
   padding:24px;
   border-radius:16px;
   width:92%;
   max-width:420px;
-  box-shadow:0 12px 30px rgba(0,0,0,0.08);
+  box-shadow:0 12px 32px rgba(0,0,0,.08);
   margin-bottom:20px;
-}
-
-h2,h3{margin:0 0 12px}
-
-label{
-  font-size:14px;
-  color:var(--muted);
-  display:block;
-  margin-top:12px;
-}
-
-input,select,textarea,button{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  margin-top:6px;
-  font-size:15px;
-}
-
-textarea{resize:none}
-
-button{
-  background:var(--blue);
-  color:white;
-  font-weight:600;
-  border:none;
-  cursor:pointer;
 }
 
 .hidden{display:none}
 .small{font-size:13px;color:var(--muted)}
-.metric{display:flex;justify-content:space-between;margin:6px 0}
-.issue{border:1px solid var(--border);padding:12px;border-radius:10px;margin-top:10px}
+label{font-size:14px;color:var(--muted);margin-top:12px;display:block}
+
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  font-size:15px;
+  border:1px solid var(--border);
+  border-radius:10px;
+}
+
+button{
+  background:var(--blue);
+  color:white;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button.secondary{
+  background:#e5efff;
+  color:var(--blue);
+}
+
+.metric{
+  display:flex;
+  justify-content:space-between;
+  margin:6px 0;
+}
+
+.issue{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-top:10px;
+}
+
+.issue-actions{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- ===== ENTRY ===== -->
+<!-- ENTRY -->
 <div id="entry" class="center">
   <div class="card">
     <h2>Azoul</h2>
-    <p class="small">Enter your Azoul access code</p>
-    <input id="codeInput" placeholder="AZ-101-E1 or AZ-101-M1">
+    <p class="small">🔒 Anonymous. No logins.</p>
+    <input id="codeInput" placeholder="Enter code (e.g. A1E)">
     <button onclick="enterApp()">Continue</button>
   </div>
 </div>
 
-<!-- ===== EMPLOYEE ===== -->
+<!-- EMPLOYEE -->
 <div id="employee" class="center hidden">
   <div id="employeeForm" class="card">
     <h3>Anonymous Check‑In</h3>
 
-    <label>Department (optional)</label>
-    <select id="department">
-      <option value="">Select department</option>
-      <option>Sales</option>
-      <option>Operations</option>
-      <option>Support</option>
-      <option>Engineering</option>
-      <option>Other</option>
-    </select>
-
-    <label>How was this week?</label>
+    <label>How do you feel this week?</label>
     <select id="pulse">
-      <option value="1">Stressed</option>
-      <option value="2">Neutral</option>
-      <option value="3">Good</option>
+      <option value="1">😔 Overwhelmed</option>
+      <option value="2">😐 Okay</option>
+      <option value="3">🙂 Good</option>
+      <option value="4">😄 Great</option>
     </select>
 
     <label>Concern category (optional)</label>
@@ -134,109 +122,95 @@ button{
       <option>Other</option>
     </select>
 
-    <textarea maxlength="280"
-      placeholder="Optional (never shown directly to managers)"></textarea>
-
     <button onclick="submitEmployee()">Submit</button>
-    <p class="small">No names. No logins. Anonymous by design.</p>
+    <p class="small">No names. No tracking.</p>
   </div>
 
-  <!-- ✅ Employee confirmation -->
   <div id="employeeDone" class="card hidden">
-    <h3>Thank you</h3>
-    <p class="small">
-      Your check‑in was submitted anonymously.<br>
-      It will only be used in aggregated insights.
-    </p>
-    <button onclick="submitAnother()">Submit Another</button>
+    <h3>✅ Submitted</h3>
+    <p class="small">Your feedback was recorded anonymously.</p>
+    <button onclick="submitAnother()">Done</button>
   </div>
 </div>
 
-<!-- ===== MANAGER ===== -->
+<!-- MANAGER -->
 <div id="manager" class="center hidden">
   <div class="card">
-    <h3>Team Health Overview</h3>
+    <h3>Manager Dashboard</h3>
 
     <div id="summary"></div>
 
-    <h4 style="margin-top:16px;">Open Issues</h4>
+    <h4>Open Issues</h4>
     <div id="issues"></div>
   </div>
 </div>
 
 <script>
-/* ===================================================
-   GLOBAL STATE & HELPERS
-=================================================== */
-let businessId = "";
+/* ================= PASSWORDS ================= */
+
+const PASSWORDS = {
+  employees: ["A1E","A1E1","A1E2","A1E3","A1E4","A1E5"],
+  managers:  ["A1M","A1M1","A1M2","A1M3","A1M4","A1M5"]
+};
+
+const BUSINESS_ID = "A1";
+
+/* ================= STORAGE ================= */
 
 const load = (k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
 const save = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
 
-function weekKey(){
+function currentWeek(){
   const d=new Date();
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 }
 
-/* ===================================================
-   ENTRY / ROUTING (FIXED)
-=================================================== */
+/* ================= ENTRY ================= */
+
 function enterApp(){
-  const code = codeInput.value.trim();
-  if(!code.startsWith("AZ-")){
-    alert("Invalid Azoul code");
-    return;
-  }
+  const code = codeInput.value.trim().toUpperCase();
 
-  const p = code.split("-");
-  businessId = p[0] + "-" + p[1];
-
-  // ✅ HARD RESET — hide everything
   entry.classList.add("hidden");
   employee.classList.add("hidden");
   manager.classList.add("hidden");
 
-  // ✅ STRICT routing
-  if(code.includes("-E")){
+  if (PASSWORDS.employees.includes(code)) {
     employee.classList.remove("hidden");
     return;
   }
 
-  if(code.includes("-M")){
+  if (PASSWORDS.managers.includes(code)) {
     manager.classList.remove("hidden");
-    loadManager(); // ✅ ONLY called here
+    loadManager();
     return;
   }
 
-  alert("Invalid role code");
+  entry.classList.remove("hidden");
+  alert("Invalid Azoul code");
 }
 
-/* ===================================================
-   EMPLOYEE FLOW (ISOLATED)
-=================================================== */
+/* ================= EMPLOYEE ================= */
+
 function submitEmployee(){
-  const week = weekKey();
+  const week = currentWeek();
   const health = load("health",{});
   const concerns = load("concerns",[]);
 
-  health[businessId] ??= {};
-  health[businessId][week] ??= { pulses:[] };
-  health[businessId][week].pulses.push(+pulse.value);
+  health[BUSINESS_ID] ??= {};
+  health[BUSINESS_ID][week] ??= { pulses:[] };
+  health[BUSINESS_ID][week].pulses.push(+pulse.value);
 
-  if(category.value){
+  if (category.value) {
     concerns.push({
-      businessId,
       week,
-      category:category.value,
-      department:department.value||"Unspecified",
-      status:"open"
+      category: category.value,
+      status: "open"
     });
   }
 
   save("health",health);
   save("concerns",concerns);
 
-  // ✅ Switch to confirmation screen
   employeeForm.classList.add("hidden");
   employeeDone.classList.remove("hidden");
 }
@@ -246,40 +220,58 @@ function submitAnother(){
   employeeForm.classList.remove("hidden");
 }
 
-/* ===================================================
-   MANAGER FLOW (SAFE)
-=================================================== */
+/* ================= MANAGER ================= */
+
 function loadManager(){
-  if(manager.classList.contains("hidden")) return; // safety guard
-
-  const week = weekKey();
+  const week = currentWeek();
   const health = load("health",{});
-  const concerns = load("concerns",[])
-     .filter(c=>c.businessId===businessId && c.status==="open");
+  const allConcerns = load("concerns",[]);
+  const openConcerns = allConcerns.filter(c => c.status === "open");
 
-  const pulses = health[businessId]?.[week]?.pulses || [];
+  const pulses = health[BUSINESS_ID]?.[week]?.pulses || [];
   const avg = pulses.length
     ? (pulses.reduce((a,b)=>a+b)/pulses.length).toFixed(2)
     : "N/A";
 
   summary.innerHTML = `
     <div class="metric"><span>Avg Pulse</span><b>${avg}</b></div>
-    <div class="metric"><span>Open Issues</span><b>${concerns.length}</b></div>
+    <div class="metric"><span>Open Issues</span><b>${openConcerns.length}</b></div>
   `;
 
   issues.innerHTML = "";
-  concerns.forEach((c,i)=>{
+
+  openConcerns.forEach((c,index)=>{
     const div=document.createElement("div");
     div.className="issue";
     div.innerHTML=`
-      <b>${c.category}</b> — ${c.department}<br>
-      <small>Week ${c.week}</small>
+      <b>${c.category}</b>
+      <div class="issue-actions">
+        <button class="secondary" onclick="resolveIssue(${index})">Resolve</button>
+        <button class="secondary" onclick="dismissIssue(${index})">Dismiss</button>
+      </div>
     `;
     issues.appendChild(div);
   });
+}
+
+function resolveIssue(index){
+  updateIssueStatus(index,"resolved");
+}
+
+function dismissIssue(index){
+  updateIssueStatus(index,"dismissed");
+}
+
+function updateIssueStatus(index,status){
+  let allConcerns = load("concerns",[]);
+  let openConcerns = allConcerns.filter(c => c.status === "open");
+
+  openConcerns[index].status = status;
+
+  save("concerns",allConcerns);
+  loadManager();
 }
 </script>
 
 </body>
 </html>
-``
