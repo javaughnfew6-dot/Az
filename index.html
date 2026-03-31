@@ -17,7 +17,7 @@
 
 body{
   margin:0;
-  font-family:Inter, system-ui, sans-serif;
+  font-family:Inter,system-ui,sans-serif;
   background:#f5f9ff;
   color:var(--text);
 }
@@ -35,8 +35,8 @@ body{
   padding:24px;
   border-radius:16px;
   width:92%;
-  max-width:420px;
-  box-shadow:0 12px 32px rgba(0,0,0,.08);
+  max-width:520px;
+  box-shadow:0 14px 40px rgba(0,0,0,.08);
   margin-bottom:20px;
 }
 
@@ -48,9 +48,9 @@ input,select,button{
   width:100%;
   padding:12px;
   margin-top:6px;
-  font-size:15px;
   border:1px solid var(--border);
   border-radius:10px;
+  font-size:15px;
 }
 
 button{
@@ -83,6 +83,27 @@ button.secondary{
   display:flex;
   gap:8px;
   margin-top:8px;
+}
+
+/* ✅ HR ANALYTICS IMAGE PANEL */
+.hr-analytics-panel{
+  margin-top:20px;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+
+.hr-analytics-panel img{
+  width:100%;
+  display:block;
+}
+
+.hr-analytics-caption{
+  padding:12px 16px;
+  background:#f8fbff;
+  border-top:1px solid var(--border);
+  font-size:13px;
+  color:var(--muted);
 }
 </style>
 </head>
@@ -140,77 +161,69 @@ button.secondary{
 
     <div id="summary"></div>
 
-    <h4>Open Issues</h4>
+    <!-- ✅ HR ANALYTICS DASHBOARD IMAGE -->
+    <div class="hr-analytics-panel">
+      <img src="hr-analytics.png" alt="HR Analytics Dashboard">
+      <div class="hr-analytics-caption">
+        Reference view: common HR analytics metrics (attrition, demographics, engagement).
+        Displayed for contextual insight only.
+      </div>
+    </div>
+
+    <h4 style="margin-top:20px;">Open Issues</h4>
     <div id="issues"></div>
   </div>
 </div>
 
 <script>
-/* ================= PASSWORDS ================= */
-
+/* ===== PASSWORDS ===== */
 const PASSWORDS = {
-  employees: ["A1E","A1E1","A1E2","A1E3","A1E4","A1E5"],
-  managers:  ["A1M","A1M1","A1M2","A1M3","A1M4","A1M5"]
+  employees: ["AZ1E","AZ1E1","AZ1E2","AZ1E3","AZ1E4","AZ1E5","AZ1E6","AZ1E7","AZ1E8","AZ1E9","AZ1E51"],
+  managers:  ["AZ1M","AZ1M1","AZ1M2","AZ1M3","AZ1M4","AZ1M5","AZ1M6","AZ1M7","AZ1M8","AZ1M9","AZ1M51"]
 };
-
 const BUSINESS_ID = "A1";
 
-/* ================= STORAGE ================= */
+/* ===== STORAGE ===== */
+const load=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const week=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")};
 
-const load = (k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
-const save = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
-
-function currentWeek(){
-  const d=new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-}
-
-/* ================= ENTRY ================= */
-
+/* ===== ENTRY ===== */
 function enterApp(){
-  const code = codeInput.value.trim().toUpperCase();
-
+  const code=codeInput.value.trim().toUpperCase();
   entry.classList.add("hidden");
   employee.classList.add("hidden");
   manager.classList.add("hidden");
 
-  if (PASSWORDS.employees.includes(code)) {
+  if(PASSWORDS.employees.includes(code)){
     employee.classList.remove("hidden");
     return;
   }
-
-  if (PASSWORDS.managers.includes(code)) {
+  if(PASSWORDS.managers.includes(code)){
     manager.classList.remove("hidden");
     loadManager();
     return;
   }
-
   entry.classList.remove("hidden");
   alert("Invalid Azoul code");
 }
 
-/* ================= EMPLOYEE ================= */
-
+/* ===== EMPLOYEE ===== */
 function submitEmployee(){
-  const week = currentWeek();
-  const health = load("health",{});
-  const concerns = load("concerns",[]);
+  const h=load("health",{});
+  const c=load("concerns",[]);
+  const w=week();
 
-  health[BUSINESS_ID] ??= {};
-  health[BUSINESS_ID][week] ??= { pulses:[] };
-  health[BUSINESS_ID][week].pulses.push(+pulse.value);
+  h[BUSINESS_ID]??={};
+  h[BUSINESS_ID][w]??={p:[]};
+  h[BUSINESS_ID][w].p.push(+pulse.value);
 
-  if (category.value) {
-    concerns.push({
-      week,
-      category: category.value,
-      status: "open"
-    });
+  if(category.value){
+    c.push({week:w,category:category.value,status:"open"});
   }
 
-  save("health",health);
-  save("concerns",concerns);
-
+  save("health",h);
+  save("concerns",c);
   employeeForm.classList.add("hidden");
   employeeDone.classList.remove("hidden");
 }
@@ -220,55 +233,39 @@ function submitAnother(){
   employeeForm.classList.remove("hidden");
 }
 
-/* ================= MANAGER ================= */
-
+/* ===== MANAGER ===== */
 function loadManager(){
-  const week = currentWeek();
-  const health = load("health",{});
-  const allConcerns = load("concerns",[]);
-  const openConcerns = allConcerns.filter(c => c.status === "open");
+  const h=load("health",{});
+  const all=load("concerns",[]);
+  const open=all.filter(x=>x.status==="open");
+  const w=week();
+  const p=h[BUSINESS_ID]?.[w]?.p||[];
+  const avg=p.length?(p.reduce((a,b)=>a+b)/p.length).toFixed(2):"N/A";
 
-  const pulses = health[BUSINESS_ID]?.[week]?.pulses || [];
-  const avg = pulses.length
-    ? (pulses.reduce((a,b)=>a+b)/pulses.length).toFixed(2)
-    : "N/A";
-
-  summary.innerHTML = `
+  summary.innerHTML=`
     <div class="metric"><span>Avg Pulse</span><b>${avg}</b></div>
-    <div class="metric"><span>Open Issues</span><b>${openConcerns.length}</b></div>
+    <div class="metric"><span>Open Issues</span><b>${open.length}</b></div>
   `;
 
-  issues.innerHTML = "";
-
-  openConcerns.forEach((c,index)=>{
+  issues.innerHTML="";
+  open.forEach((x,i)=>{
     const div=document.createElement("div");
     div.className="issue";
     div.innerHTML=`
-      <b>${c.category}</b>
+      <b>${x.category}</b>
       <div class="issue-actions">
-        <button class="secondary" onclick="resolveIssue(${index})">Resolve</button>
-        <button class="secondary" onclick="dismissIssue(${index})">Dismiss</button>
+        <button class="secondary" onclick="updateIssue(${i},'resolved')">Resolve</button>
+        <button class="secondary" onclick="updateIssue(${i},'dismissed')">Dismiss</button>
       </div>
     `;
     issues.appendChild(div);
   });
 }
 
-function resolveIssue(index){
-  updateIssueStatus(index,"resolved");
-}
-
-function dismissIssue(index){
-  updateIssueStatus(index,"dismissed");
-}
-
-function updateIssueStatus(index,status){
-  let allConcerns = load("concerns",[]);
-  let openConcerns = allConcerns.filter(c => c.status === "open");
-
-  openConcerns[index].status = status;
-
-  save("concerns",allConcerns);
+function updateIssue(i,status){
+  const all=load("concerns",[]);
+  all.filter(x=>x.status==="open")[i].status=status;
+  save("concerns",all);
   loadManager();
 }
 </script>
