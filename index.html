@@ -6,9 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+/* ===== GLOBAL STYLE ===== */
 body{
   margin:0;
-  font-family:Inter,system-ui,sans-serif;
+  font-family:system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background:#0b1220;
   color:#e5e7eb;
 }
@@ -25,8 +26,8 @@ body{
 
 .card{
   background:#111827;
-  border-radius:12px;
   padding:20px;
+  border-radius:12px;
   width:95%;
   max-width:1000px;
   margin-bottom:20px;
@@ -34,12 +35,13 @@ body{
 
 input,select,button{
   width:100%;
-  margin-top:10px;
   padding:12px;
-  background:#1f2933;
+  margin-top:10px;
+  background:#020617;
   color:white;
-  border:1px solid #374151;
+  border:1px solid #1e293b;
   border-radius:8px;
+  font-size:15px;
 }
 
 button{
@@ -47,6 +49,15 @@ button{
   border:none;
   cursor:pointer;
   font-weight:600;
+}
+
+button:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+h2,h3{
+  margin:0 0 10px;
 }
 
 .metric-grid{
@@ -61,21 +72,22 @@ button{
   border:1px solid #1e293b;
   border-radius:10px;
   padding:14px;
+  text-align:left;
 }
 
-.metric h3{
+.metric h4{
   margin:0;
-  font-size:14px;
+  font-size:13px;
   color:#94a3b8;
 }
 
 .metric p{
-  font-size:28px;
-  margin-top:6px;
+  font-size:30px;
+  margin-top:8px;
 }
 
 .placeholder{
-  opacity:.35;
+  opacity:0.35;
 }
 
 .issue{
@@ -89,23 +101,23 @@ button{
 
 <body>
 
-<!-- ENTRY -->
+<!-- ===== ENTRY ===== -->
 <div id="entry" class="center">
   <div class="card" style="max-width:420px;">
     <h2>Azoul</h2>
-    <input id="codeInput" placeholder="A1E or A1M">
+    <input id="codeInput" placeholder="Enter access code (A1E or A1M)">
     <button onclick="enter()">Continue</button>
   </div>
 </div>
 
-<!-- EMPLOYEE -->
+<!-- ===== EMPLOYEE ===== -->
 <div id="employee" class="center hidden">
   <div class="card" style="max-width:420px;">
     <h3>Anonymous Employee Check‑In</h3>
 
-    <label>What type of issue are you experiencing?</label>
+    <label>What issue are you experiencing?</label>
     <select id="category">
-      <option value="">Select</option>
+      <option value="">Select an issue</option>
       <option>Workload</option>
       <option>Management</option>
       <option>Burnout</option>
@@ -116,28 +128,43 @@ button{
   </div>
 </div>
 
-<!-- MANAGER -->
+<!-- ===== MANAGER ===== -->
 <div id="manager" class="center hidden">
 
-  <!-- VISUAL DASHBOARD HEADER -->
+  <!-- Visual shell matching HR dashboard -->
   <div class="card">
-    hr-dashboard.png
+    <img src="hr-dashboard.png" style="width:100%;border-radius:10px;">
   </div>
 
-  <!-- METRICS -->
+  <!-- Metrics -->
   <div class="card">
     <h3>HR Analytics Dashboard</h3>
 
     <div class="metric-grid">
-      <div class="metric"><h3>Employee Count</h3><p id="empCount" class="placeholder">—</p></div>
-      <div class="metric"><h3>Attrition Count</h3><p id="attrCount" class="placeholder">—</p></div>
-      <div class="metric"><h3>Attrition Rate</h3><p id="attrRate" class="placeholder">—</p></div>
-      <div class="metric"><h3>Active Employees</h3><p id="active" class="placeholder">—</p></div>
-      <div class="metric"><h3>Avg Age</h3><p id="age" class="placeholder">—</p></div>
+      <div class="metric">
+        <h4>Employee Count</h4>
+        <p id="empCount" class="placeholder">—</p>
+      </div>
+      <div class="metric">
+        <h4>Attrition Count</h4>
+        <p id="attrCount" class="placeholder">—</p>
+      </div>
+      <div class="metric">
+        <h4>Attrition Rate</h4>
+        <p id="attrRate" class="placeholder">—</p>
+      </div>
+      <div class="metric">
+        <h4>Active Employees</h4>
+        <p id="activeCount" class="placeholder">—</p>
+      </div>
+      <div class="metric">
+        <h4>Avg. Age</h4>
+        <p id="avgAge" class="placeholder">—</p>
+      </div>
     </div>
   </div>
 
-  <!-- ISSUES -->
+  <!-- Issues -->
   <div class="card">
     <h3>Incoming Concerns</h3>
     <div id="issues" class="placeholder">No data available</div>
@@ -146,43 +173,59 @@ button{
 </div>
 
 <script>
-let BUSINESS="A1";
+/* ================= DATA ================= */
+function load(key,def){return JSON.parse(localStorage.getItem(key)||JSON.stringify(def))}
+function save(key,val){localStorage.setItem(key,JSON.stringify(val))}
 
-function load(k,d){return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}
-function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
-
+/* ================= ROUTING ================= */
 function enter(){
-  const c=codeInput.value.trim().toUpperCase();
+  const code = codeInput.value.trim().toUpperCase();
   entry.classList.add("hidden");
-  if(c==="A1E"){employee.classList.remove("hidden");return;}
-  if(c==="A1M"){manager.classList.remove("hidden");loadManager();return;}
+
+  if(code==="A1E"){
+    employee.classList.remove("hidden");
+    return;
+  }
+  if(code==="A1M"){
+    manager.classList.remove("hidden");
+    loadManager();
+    return;
+  }
+
   alert("Invalid code");
+  entry.classList.remove("hidden");
 }
 
+/* ================= EMPLOYEE ================= */
 function submitEmployee(){
-  const data=load("issues",[]);
-  if(!category.value){alert("Select a category");return;}
-  data.push({category:category.value,time:Date.now()});
+  if(!category.value){
+    alert("Please select an issue");
+    return;
+  }
+  const data = load("issues",[]);
+  data.push({category:category.value});
   save("issues",data);
   alert("Submitted anonymously");
   category.value="";
 }
 
+/* ================= MANAGER ================= */
 function loadManager(){
-  const issuesData=load("issues",[]);
-  if(issuesData.length===0) return;
+  const issues = load("issues",[]);
+  if(issues.length===0) return;
 
-  // Populate metrics ONLY after data exists
-  empCount.textContent="1,233";
-  attrCount.textContent=issuesData.length;
-  attrRate.textContent=(issuesData.length*2)+"%";
-  active.textContent=1233-issuesData.length;
-  age.textContent="37";
+  // Populate metrics only after data exists
+  empCount.textContent = "1,233";
+  attrCount.textContent = issues.length;
+  attrRate.textContent = (issues.length * 2) + "%";
+  activeCount.textContent = 1233 - issues.length;
+  avgAge.textContent = "37";
 
-  document.querySelectorAll(".placeholder").forEach(e=>e.classList.remove("placeholder"));
+  document.querySelectorAll(".placeholder")
+    .forEach(el=>el.classList.remove("placeholder"));
 
-  issues.innerHTML="";
-  issuesData.forEach(i=>{
+  issuesDiv.innerHTML = "";
+  issues.forEach(i=>{
     const div=document.createElement("div");
     div.className="issue";
     div.textContent=i.category;
@@ -193,3 +236,4 @@ function loadManager(){
 
 </body>
 </html>
+``
